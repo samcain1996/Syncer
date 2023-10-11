@@ -1,15 +1,21 @@
-#pragma once
+
 #include "Client.hpp"
 #include "Server.hpp"
 
 void Serve() {
     Server server;
-    server.Listen();
+    if (!server.Listen()) {
+        cerr << "Failed to connect";
+    }
+    else { cout << "Connected to Client!"; }
 }
 
 void Clie() {
     Client client;
-    client.Connect("192.168.50.160", "3000");
+    if (!client.Connect("192.168.50.130", "3000")) {
+        cerr << "Failed to connect";
+    }
+    else { cout << "Connected to Server!"; }
 }
 
 int main(int argc, char** argv) {
