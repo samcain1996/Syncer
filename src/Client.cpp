@@ -14,7 +14,7 @@ Client::~Client() {
 
 File Client::GetFile(const string& filename) {
 
-    File file = std::nullopt;
+    File file = NoFile;
     auto [socket, acceptor, error_code] = connection.AsTuple();
 
     Buffer buf;
@@ -25,11 +25,11 @@ File Client::GetFile(const string& filename) {
         if (error_code != errc::success) { return file; }
 
         Data data;
-        std::copy(buf.begin(), buf.begin() + bytes_received, std::back_inserter(data));
+        std::copy(buf.begin(), buf.begin() + bytes_received, back_inserter(data));
         file = std::make_pair(filename, data);
     }
 
-    socket->send(buffer(connection.DISCONNECT_MESSAGE));
+    socket->send(buffer(connection.DISCONNECT_MESSAGE), 0, error_code);
     connection.Disconnect();
 
     return file;
@@ -41,7 +41,7 @@ bool Client::Connect(const string& address, const string& port) {
     tcp::endpoint endpoint(address::from_string(address), std::stoi(port));
     connection.socket->connect(endpoint, connection.error_code);
 
-    bool connected = connection.error_code == boost::system::errc::success;
+    bool connected = connection.error_code == errc::success;
     if (connected) { connection.Connect(); }
     return connection.IsConnected();
 

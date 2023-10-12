@@ -8,8 +8,8 @@ string GetIpAddress() {
     ifstream inputStream("res/Client.config");
 
     string line;
-    while (std::getline(inputStream, line)) {
-        if (line.find("ip=") != line.npos) {
+    while (getline(inputStream, line)) {
+        if (line.find(delim) != line.npos) {
             ip = line.substr(line.find(delim) + delim.size());
             break;
         }
@@ -24,8 +24,8 @@ string GetPort() {
     ifstream inputStream("res/Client.config");
 
     string line;
-    while (std::getline(inputStream, line)) {
-        if (line.find("port=") != line.npos) {
+    while (getline(inputStream, line)) {
+        if (line.find(delim) != line.npos) {
             port = line.substr(line.find(delim) + delim.size());
             break;
         }
@@ -52,7 +52,9 @@ void StartClient() {
         return;
     }
     
-    auto file = client.GetFile("Test");
+    File file = client.GetFile("Test");
+    if (!file.has_value()) { cerr << "No file found\n"; return; }
+
     for (int i = 0; i < file.value().second.size(); i++) {
         cout << file.value().second[i];
     }

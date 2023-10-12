@@ -22,34 +22,36 @@ void Server::Loop() {
     while(connection.IsConnected()) {
 
         auto bytes_received = connection.socket->receive(buffer(buf), 0, connection.error_code);
-        if (std::memcmp(connection.DISCONNECT_MESSAGE.data(), buf.data(), connection.DISCONNECT_MESSAGE.size()) == 0) { connection.Disconnect(); return; }
-        if (connection.error_code != errc::success) { connection.Disconnect(); return; }
+        if (std::memcmp(connection.DISCONNECT_MESSAGE.data(), buf.data(), connection.DISCONNECT_MESSAGE.size()) == 0 ||
+            connection.error_code != errc::success) { connection.Disconnect(); return; }
 
-        string filename;
-        for (int i = 0; i < bytes_received; i++) { filename += buf[i]; }
+        string filename(buf.begin(), buf.begin() + bytes_received);
         SendFile(filename);
+
+        Data newData;
+        string str = "Howdy partner! This is a new file that is saved";
+        std::copy(str.begin(), str.end(), back_inserter(newData));
+        AddFile(filename + "New", newData);
     }
 
 }
 
 bool Server::AddFile(const string& filename, Data& data) {
-    files[filename] = data;
-
-    ofstream writer(filename);
-    if (!writer.good()) { return false;}
+    ofstream writer("syncedFiles/"+filename);
+    if (writer.bad()) { return false;}
     writer.write((char*)data.data(), data.size());
     return true;
 }
 
 bool Server::InitFiles() {
 
-    ifstream fileStream("Test", ios_base::binary);
-    if (!fileStream.good()) { return false; }
+    ifstream fileStream("syncedFiles/Test", ios_base::binary);
+    if (fileStream.bad()) { return false; }
 
     Data data;
     string line;
-    while (std::getline(fileStream, line)) {
-        std::copy(line.begin(), line.end(), std::back_inserter(data));
+    while (getline(fileStream, line)) {
+        std::copy(line.begin(), line.end(), back_inserter(data));
     }
     files["Test"] = data;
 
@@ -58,7 +60,7 @@ bool Server::InitFiles() {
 
 File Server::SendFile(const string& filename) {
 
-    File file = std::nullopt;
+    File file = NoFile;
 
     if (files.contains(filename)) {
         file = std::make_pair(filename, files.at(filename));

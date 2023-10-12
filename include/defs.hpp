@@ -18,10 +18,15 @@ using std::ifstream;
 using std::ofstream;
 using std::ios_base;
 using std::getline;
+using std::make_pair;
 using std::back_inserter;
+using std::tuple;
+using std::make_tuple;
 using namespace boost::asio::ip;
 using namespace boost::asio;
 using namespace boost::system;
+
+static constexpr const std::nullopt_t NoFile = std::nullopt;
 
 class Connection {
 
@@ -43,8 +48,8 @@ public:
 
     bool IsConnected() const { return connected; }
 
-    std::tuple<tcp::socket*, tcp::acceptor*, boost::system::error_code> AsTuple() {
-        return std::make_tuple(socket, acceptor, error_code);
+    tuple<tcp::socket*, tcp::acceptor*, boost::system::error_code> AsTuple() {
+        return make_tuple(socket, acceptor, error_code);
     }
 
 };
