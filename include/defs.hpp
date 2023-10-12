@@ -26,7 +26,10 @@ using namespace boost::asio::ip;
 using namespace boost::asio;
 using namespace boost::system;
 
+static inline const int BUFFER_SIZE = 2048;
+
 static constexpr const std::nullopt_t NoFile = std::nullopt;
+using Buffer = std::array<char, BUFFER_SIZE>;
 
 class Connection {
 
@@ -34,8 +37,10 @@ class Connection {
 
 public:
 
+    Buffer sendBuf;
+    Buffer receiveBuf;
+
     static inline const Data DISCONNECT_MESSAGE = { 'B', 'Y', 'E', '!' };
-    static inline const int BUFFER_SIZE = 2048;
 
     io_service* io_service;
     tcp::socket* socket;
@@ -53,8 +58,6 @@ public:
     }
 
 };
-
-using Buffer = std::array<char, Connection::BUFFER_SIZE>;
 
 static File GetFile(const string& filename) {
 

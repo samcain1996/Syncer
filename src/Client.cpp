@@ -14,21 +14,29 @@ Client::~Client() {
 
 }
 
-File Client::GetFile(const string& filename) {
+File Client::GetFile(bool dl, const string& filename) {
 
     File file = NoFile;
     auto [socket, acceptor, error_code] = connection.AsTuple();
 
-    Buffer buf;
+    string dOrU = dl ? "download" : "upload";
+    socket->send(buffer(dOrU));
+    auto y = socket->receive(buffer(connection.receiveBuf));
     socket->send(buffer(filename));
-    if (error_code == errc::success) {
 
-        auto bytes_received = socket->receive(buffer(buf));
+    if (dl && error_code == errc::success) {
+
+        auto bytes_received = socket->receive(buffer(connection.receiveBuf));
         if (error_code != errc::success) { return file; }
 
         Data data;
-        std::copy(buf.begin(), buf.begin() + bytes_received, back_inserter(data));
+        std::copy(connection.receiveBuf.begin(), connection.receiveBuf.begin() + bytes_received, back_inserter(data));
         file = std::make_pair(filename, data);
+    }
+    else {
+        y = socket->receive(buffer(connection.receiveBuf));
+        connection.sendBuf = {'C', 'O', 'M', 'E', ' ', 'O', 'N', '!' };
+        socket->send(buffer(connection.sendBuf));
     }
 
     socket->send(buffer(connection.DISCONNECT_MESSAGE), 0, error_code);

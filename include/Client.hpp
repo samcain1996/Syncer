@@ -10,6 +10,6 @@ struct Client {
 
     bool Connect(const string& address, const string& port);
 
-    File GetFile(const string& filename);
+    File GetFile(bool dl, const string& filename);
 
 };

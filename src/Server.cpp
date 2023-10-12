@@ -10,7 +10,6 @@ Server::Server(const string& port) {
 }
 Server::~Server() {
 
-    // TODO: delete connection
     delete connection.acceptor;
     delete connection.socket; 
     delete connection.io_service;
@@ -20,21 +19,33 @@ Server::~Server() {
 void Server::Loop() {
 
     auto [socket, acceptor, error_code] = connection.AsTuple();
+    auto& sendBuf = connection.sendBuf;
+    auto& receiveBuf = connection.receiveBuf;
 
-    Buffer buf;
     while(connection.IsConnected()) {
 
-        auto bytes_received = socket->receive(buffer(buf), 0, error_code);
-        if (std::memcmp(connection.DISCONNECT_MESSAGE.data(), buf.data(), connection.DISCONNECT_MESSAGE.size()) == 0 ||
+        auto bytes_received = socket->receive(buffer(sendBuf), 0, error_code);
+        socket->send(buffer(sendBuf));
+        if (std::memcmp(connection.DISCONNECT_MESSAGE.data(), receiveBuf.data(), connection.DISCONNECT_MESSAGE.size()) == 0 ||
             error_code != errc::success) { connection.Disconnect(); return; }
+        Buffer tmp;
+        std::copy(receiveBuf.begin(), receiveBuf.begin() + bytes_received, tmp.begin());
 
-        string filename(buf.begin(), buf.begin() + bytes_received);
-        SendFile(filename);
+        bytes_received = socket->receive(buffer(receiveBuf), 0, error_code);
 
-        Data newData;
-        string str = "Howdy partner! This is a new file that is saved";
-        std::copy(str.begin(), str.end(), back_inserter(newData));
-        AddFile(filename + "New", newData);
+        string filename(receiveBuf.begin(), receiveBuf.begin() + bytes_received);
+        if (std::memcmp(tmp.data(), "download", bytes_received) == 0) {        
+            SendFile(filename);
+        }
+
+        else { 
+            socket->send(buffer(sendBuf));
+            bytes_received = socket->receive(buffer(receiveBuf), 0, error_code);
+
+            Data data; 
+            std::copy(receiveBuf.begin(), receiveBuf.begin() + bytes_received, back_inserter(data)); 
+            AddFile(filename, data); }
+
     }
 
 }
@@ -51,7 +62,7 @@ bool Server::SendFile(const string& filename) {
     File file = GetFile(filename);
 
     if (file == NoFile) { return false; }
-    
+
     connection.socket->send(buffer(file.value().second), 0, connection.error_code);
     return true;
 

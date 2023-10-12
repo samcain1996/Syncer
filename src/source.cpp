@@ -45,33 +45,50 @@ void StartServer() {
 
 }
 
-void StartClient() {
+void UploadClient() {
     Client client;
     if (!client.Connect(GetIpAddress(), GetPort())) {
         cerr << "Failed to connect\n";
         return;
     }
-    
-    File file = client.GetFile("Test");
-    if (!file.has_value()) { cerr << "No file found\n"; return; }
 
-    for (int i = 0; i < file.value().second.size(); i++) {
-        cout << file.value().second[i];
+    client.GetFile(false, "NewTest");
+    
+    
+}
+
+void DownloadClient(string filename) {
+    Client client;
+    if (!client.Connect(GetIpAddress(), GetPort())) {
+        cerr << "Failed to connect\n";
+        return;
+    }
+
+    File file = client.GetFile(true, filename);
+    if (file != NoFile) {
+        for (auto x : file.value().second) {
+            cout << x;
+        }
     }
     cout << "\n";
+
 }
 
 int main(int argc, char** argv) {
 
-    if (argc != 2) { return -1; }
+    if (argc <= 1) { return -1; }
 
     string flag = argv[1];
 
     if (flag == "s") { 
         StartServer();
     }
+    else if (flag == "d") {
+        string filename = argv[2];
+        DownloadClient(filename);
+    } 
     else {
-        StartClient();
+        UploadClient();
     }
 
     return 0;
