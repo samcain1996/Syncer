@@ -46,23 +46,14 @@ bool Server::AddFile(const string& filename, Data& data) {
     return true;
 }
 
-File Server::SendFile(const string& filename) {
+bool Server::SendFile(const string& filename) {
 
-    File file = NoFile;
+    File file = GetFile(filename);
 
-    ifstream fileStream("syncedFiles/"+filename);
-    if (fileStream.good()) {
-        Data data;
-        string line;
-        while (getline(fileStream, line)) {
-            std::copy(line.begin(), line.end(), back_inserter(data));
-        }
-        file = { filename, data };
-    }
-
+    if (file == NoFile) { return false; }
+    
     connection.socket->send(buffer(file.value().second), 0, connection.error_code);
-
-    return file;
+    return true;
 
 }
 

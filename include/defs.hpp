@@ -55,3 +55,20 @@ public:
 };
 
 using Buffer = std::array<char, Connection::BUFFER_SIZE>;
+
+static File GetFile(const string& filename) {
+
+    File file = NoFile;
+
+    ifstream fileStream("syncedFiles/"+filename);
+    if (fileStream.bad()) { return file; }
+    
+    Data data;
+    string line;
+    while (getline(fileStream, line)) {
+        std::copy(line.begin(), line.end(), back_inserter(data));
+    }
+    file = { filename, data };
+
+    return file;
+}

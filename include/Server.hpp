@@ -11,6 +11,6 @@ struct Server {
     void Loop();
     bool AddFile(const string& filename, Data& data);
     
-    File SendFile(const string& filename);
+    bool SendFile(const string& filename);
 };
 

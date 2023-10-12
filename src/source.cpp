@@ -5,7 +5,7 @@
 string GetIpAddress() {
     string ip = "0.0.0.0";
     string delim = "ip=";
-    ifstream inputStream("res/Client.config");
+    ifstream inputStream("res/syncer.config");
 
     string line;
     while (getline(inputStream, line)) {
@@ -21,7 +21,7 @@ string GetIpAddress() {
 string GetPort() {
     string port = "0";
     string delim = "port=";
-    ifstream inputStream("res/Client.config");
+    ifstream inputStream("res/syncer.config");
 
     string line;
     while (getline(inputStream, line)) {
