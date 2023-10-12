@@ -1,6 +1,7 @@
-*
-
-!src/
-!include/
-!*.md
-!.gitignore
+*.json
+*.dSYM/
+compile
+NewTest
+*.py
+*.txt
+syncer

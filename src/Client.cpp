@@ -9,6 +9,8 @@ Client::Client() {
 Client::~Client() {
 
     // TODO: delete connection
+    delete connection.socket; 
+        delete connection.io_service;
 
 }
 
