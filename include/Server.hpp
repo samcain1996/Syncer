@@ -7,10 +7,9 @@ using FileMap = std::unordered_map<string, Data>;
 struct Server {
     Connection connection;
 
-    int port;
     FileMap files;
     
-    Server();
+    Server(const string& port);
     ~Server();
 
     bool Listen();

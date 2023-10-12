@@ -17,6 +17,8 @@ using std::string;
 using std::ifstream;
 using std::ofstream;
 using std::ios_base;
+using std::getline;
+using std::back_inserter;
 using namespace boost::asio::ip;
 using namespace boost::asio;
 using namespace boost::system;
@@ -29,7 +31,6 @@ public:
 
     static inline const Data DISCONNECT_MESSAGE = { 'B', 'Y', 'E', '!' };
     static inline const int BUFFER_SIZE = 2048;
-
 
     io_service* io_service;
     tcp::socket* socket;
@@ -47,3 +48,5 @@ public:
     }
 
 };
+
+using Buffer = std::array<char, Connection::BUFFER_SIZE>;

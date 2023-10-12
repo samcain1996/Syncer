@@ -1,19 +1,13 @@
 #include "Server.hpp"
 
-Server::Server() {
-
-    port = 3000;
+Server::Server(const string& port) {
 
     InitFiles();
 
-    connection.io_service = new boost::asio::io_service();
-    connection.acceptor = new tcp::acceptor(*connection.io_service, tcp::endpoint(tcp::v4(), port));
+    connection.io_service = new io_service();
+    connection.acceptor = new tcp::acceptor(*connection.io_service, tcp::endpoint(tcp::v4(), std::stoi(port)));
     connection.socket = new tcp::socket(*connection.io_service);
 
-    string newStr = "This is another test!";
-    Data data;
-    std::copy(newStr.begin(), newStr.end(), std::back_inserter(data));
-    AddFile("NewTest", data);
 
 }
 Server::~Server() {
@@ -24,11 +18,11 @@ Server::~Server() {
 
 void Server::Loop() {
 
-    char buf[Connection::BUFFER_SIZE];
+    Buffer buf;
     while(connection.IsConnected()) {
 
         auto bytes_received = connection.socket->receive(buffer(buf), 0, connection.error_code);
-        if (std::memcmp(connection.DISCONNECT_MESSAGE.data(), buf, 4) == 0) { connection.Disconnect(); return; }
+        if (std::memcmp(connection.DISCONNECT_MESSAGE.data(), buf.data(), connection.DISCONNECT_MESSAGE.size()) == 0) { connection.Disconnect(); return; }
         if (connection.error_code != errc::success) { connection.Disconnect(); return; }
 
         string filename;
@@ -70,7 +64,7 @@ File Server::SendFile(const string& filename) {
         file = std::make_pair(filename, files.at(filename));
     }
 
-    connection.socket->send(buffer(file.value().second, file.value().second.size()), 0, connection.error_code);
+    connection.socket->send(buffer(file.value().second), 0, connection.error_code);
 
     return file;
 
@@ -79,7 +73,7 @@ File Server::SendFile(const string& filename) {
 bool Server::Listen() {
 
     connection.acceptor->accept(*connection.socket, connection.error_code);
-    bool connected = connection.error_code == boost::system::errc::success;
+    bool connected = connection.error_code == errc::success;
     if (connected) { connection.Connect(); }
     return connection.IsConnected();
 }

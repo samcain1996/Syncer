@@ -2,7 +2,7 @@
 
 Client::Client() {
 
-    connection.io_service = new boost::asio::io_service();
+    connection.io_service = new io_service();
     connection.socket = new tcp::socket(*connection.io_service);
 
 }
@@ -15,10 +15,9 @@ Client::~Client() {
 File Client::GetFile(const string& filename) {
 
     File file = std::nullopt;
-    std::array<char, Connection::BUFFER_SIZE> buf;
-
     auto [socket, acceptor, error_code] = connection.AsTuple();
 
+    Buffer buf;
     socket->send(buffer(filename));
     if (error_code == errc::success) {
 
