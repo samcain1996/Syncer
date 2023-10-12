@@ -1,6 +1,5 @@
 *.json
 *.dSYM/
-compile
 NewTest
 *.py
 *.txt
