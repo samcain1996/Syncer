@@ -24,7 +24,7 @@ void Server::Loop() {
 
     while(connection.IsConnected()) {
 
-        auto bytes_received = socket->receive(buffer(sendBuf), 0, error_code);
+        auto bytes_received = socket->receive(buffer(receiveBuf), 0, error_code);
         socket->send(buffer(sendBuf));
         if (std::memcmp(connection.DISCONNECT_MESSAGE.data(), receiveBuf.data(), connection.DISCONNECT_MESSAGE.size()) == 0 ||
             error_code != errc::success) { connection.Disconnect(); return; }
