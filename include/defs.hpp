@@ -3,6 +3,9 @@
 #include <iostream>
 #include <string>
 #include <optional>
+#include <fstream>
+#include <tuple>
+#include <array>
 #include "boost/asio.hpp"
 
 using Data = std::vector<unsigned char>;
@@ -11,13 +14,36 @@ using File = std::optional<std::pair<std::string, Data>>;
 using std::cerr;
 using std::cout;
 using std::string;
+using std::ifstream;
+using std::ofstream;
+using std::ios_base;
 using namespace boost::asio::ip;
+using namespace boost::asio;
+using namespace boost::system;
 
-struct Connection {
+class Connection {
 
+    bool connected = false;
+
+public:
+
+    static inline const Data DISCONNECT_MESSAGE = { 'B', 'Y', 'E', '!' };
+    static inline const int BUFFER_SIZE = 2048;
+
+
+    io_service* io_service;
+    tcp::socket* socket;
+    tcp::acceptor* acceptor;
     boost::system::error_code error_code;
 
-    boost::asio::io_service* io_service;
-    tcp::socket *socket;
-    tcp::acceptor* acceptor;
+    // TODO: Implement logic
+    void Disconnect() { connected = false; }
+    void Connect()    { connected = true; }
+
+    bool IsConnected() const { return connected; }
+
+    std::tuple<tcp::socket*, tcp::acceptor*, boost::system::error_code> AsTuple() {
+        return std::make_tuple(socket, acceptor, error_code);
+    }
+
 };

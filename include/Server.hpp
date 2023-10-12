@@ -15,8 +15,8 @@ struct Server {
 
     bool Listen();
     void Loop();
-    //bool UpdateFile(const string& filename, Data& data);
-    //bool AddFile(const string& filename, Data& data);
+    bool InitFiles();
+    bool AddFile(const string& filename, Data& data);
     
     File SendFile(const string& filename);
 };

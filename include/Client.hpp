@@ -12,6 +12,6 @@ struct Client {
     //bool UpdateFile(const string& filename, Data& data);
     //bool AddFile(const string& filename, Data& data);
 
-    File GetFile(const string& filename) const;
+    File GetFile(const string& filename);
 
 };
