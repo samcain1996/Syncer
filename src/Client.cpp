@@ -16,7 +16,21 @@ File Client::GetFile(const string& filename) const {
 
     File file = std::nullopt;
 
-    // TODO: Retrieve file
+    char buf[4096];
+
+    auto x = connection.socket->send(boost::asio::buffer(filename));
+    if (connection.error_code == boost::system::errc::success) {
+
+        auto bytes_received = connection.socket->receive(boost::asio::buffer(buf));
+        if (connection.error_code != boost::system::errc::success) { return file; }
+
+        Data data;
+        for (int i = 0; i < bytes_received; i++) {
+            data.push_back(buf[i]);
+        }
+        file = std::make_pair(filename, data);
+    }
+
 
     return file;
 

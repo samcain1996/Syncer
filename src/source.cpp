@@ -6,16 +6,24 @@ void Serve() {
     Server server;
     if (!server.Listen()) {
         cerr << "Failed to connect";
+        return;
     }
-    else { cout << "Connected to Client!"; }
+    
+    server.Loop();
+
 }
 
 void Clie() {
     Client client;
     if (!client.Connect("192.168.50.130", "3000")) {
         cerr << "Failed to connect";
+        return;
     }
-    else { cout << "Connected to Server!"; }
+    
+    auto file = client.GetFile("Test");
+    for (int i = 0; i < file.value().second.size(); i++) {
+        cout << file.value().second[i];
+    }
 }
 
 int main(int argc, char** argv) {
