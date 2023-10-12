@@ -42,7 +42,7 @@ public:
 
     static inline const Data DISCONNECT_MESSAGE = { 'B', 'Y', 'E', '!' };
 
-    io_service* io_service;
+    boost::asio::io_service* io_service;
     tcp::socket* socket;
     tcp::acceptor* acceptor;
     boost::system::error_code error_code;
