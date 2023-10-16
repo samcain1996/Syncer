@@ -2,31 +2,28 @@
 
 Client::Client() {
 
-    connection.io_service = new io_service();
-    connection.socket = new tcp::socket(*connection.io_service);
+    connection.io_service = std::make_unique<boost::asio::io_service>();
+    connection.socket     = std::make_unique<tcp::socket>(*connection.io_service);
 
 }
 Client::~Client() {
 
-    // TODO: delete connection
-    delete connection.socket; 
-        delete connection.io_service;
 
 }
 
-File Client::GetFile(bool dl, const string& filename) {
+File Client::GetFile(Command download, const string& filename) {
 
-    File file = NoFile;
-    auto [socket, acceptor, error_code] = connection.AsTuple();
+    File file        = NoFile;
+    auto& socket     = connection.socket;
+    auto& error_code = connection.error_code;
 
-    string dOrU = dl ? "download" : "upload";
-    socket->send(buffer(dOrU));
-    auto y = socket->receive(buffer(connection.receiveBuf));
+    socket->send(buffer(std::to_string((int)download)));
+    socket->receive(buffer(connection.receiveBuf), 0, error_code);
     socket->send(buffer(filename));
 
-    if (dl && error_code == errc::success) {
+    if (download && error_code == errc::success) {
 
-        auto bytes_received = socket->receive(buffer(connection.receiveBuf));
+        auto bytes_received = socket->receive(buffer(connection.receiveBuf), 0, error_code);
         if (error_code != errc::success) { return file; }
 
         Data data;
@@ -34,9 +31,9 @@ File Client::GetFile(bool dl, const string& filename) {
         file = std::make_pair(filename, data);
     }
     else {
-        y = socket->receive(buffer(connection.receiveBuf));
+        socket->receive(buffer(connection.receiveBuf), 0, error_code);
         connection.sendBuf = {'C', 'O', 'M', 'E', ' ', 'O', 'N', '!' };
-        socket->send(buffer(connection.sendBuf));
+        socket->send(buffer(connection.sendBuf), 0, error_code);
     }
 
     socket->send(buffer(connection.DISCONNECT_MESSAGE), 0, error_code);
@@ -51,8 +48,7 @@ bool Client::Connect(const string& address, const string& port) {
     tcp::endpoint endpoint(address::from_string(address), std::stoi(port));
     connection.socket->connect(endpoint, connection.error_code);
 
-    bool connected = connection.error_code == errc::success;
-    if (connected) { connection.Connect(); }
+    connection.connected = connection.error_code == errc::success;
     return connection.IsConnected();
 
 }

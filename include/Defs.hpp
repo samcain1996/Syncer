@@ -8,6 +8,11 @@
 #include <array>
 #include "boost/asio.hpp"
 
+enum class Command {
+    DOWNLOAD,
+    UPLOAD,
+}
+
 using Data = std::vector<unsigned char>;
 using File = std::optional<std::pair<std::string, Data>>;
 
@@ -26,36 +31,31 @@ using namespace boost::asio::ip;
 using namespace boost::asio;
 using namespace boost::system;
 
+using SocketPtr = std::unique_ptr<tcp::socket>;
+using AcceptorPtr = std::unique_ptr<tcp::acceptor>;
+using IO_ServicePtr = std::unique_ptr<boost::asio::io_service>;
+
 static inline const int BUFFER_SIZE = 2048;
 
 static constexpr const std::nullopt_t NoFile = std::nullopt;
 using Buffer = std::array<char, BUFFER_SIZE>;
 
-class Connection {
+struct Connection {
 
-    bool connected = false;
-
-public:
+    static inline const Data DISCONNECT_MESSAGE = { 'B', 'Y', 'E', '!' };
 
     Buffer sendBuf;
     Buffer receiveBuf;
 
-    static inline const Data DISCONNECT_MESSAGE = { 'B', 'Y', 'E', '!' };
-
-    boost::asio::io_service* io_service;
-    tcp::socket* socket;
-    tcp::acceptor* acceptor;
+    bool connected = false;
+    IO_ServicePtr io_service;
+    SocketPtr socket;
+    AcceptorPtr acceptor;
     boost::system::error_code error_code;
 
-    // TODO: Implement logic
     void Disconnect() { connected = false; }
-    void Connect()    { connected = true; }
 
     bool IsConnected() const { return connected; }
-
-    tuple<tcp::socket*, tcp::acceptor*, boost::system::error_code> AsTuple() {
-        return make_tuple(socket, acceptor, error_code);
-    }
 
 };
 
