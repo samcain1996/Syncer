@@ -11,13 +11,14 @@ Client::~Client() {
 
 }
 
-File Client::GetFile(Command download, const string& filename) {
+File Client::GetFile(bool download, const string& filename) {
 
     File file        = NoFile;
     auto& socket     = connection.socket;
     auto& error_code = connection.error_code;
+    string command   = download ? "download" : "upload"; 
 
-    socket->send(buffer(std::to_string((int)download)));
+    socket->send(buffer(command));
     socket->receive(buffer(connection.receiveBuf), 0, error_code);
     socket->send(buffer(filename));
 

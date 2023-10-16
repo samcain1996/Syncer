@@ -8,11 +8,6 @@
 #include <array>
 #include "boost/asio.hpp"
 
-enum class Command {
-    DOWNLOAD,
-    UPLOAD,
-}
-
 using Data = std::vector<unsigned char>;
 using File = std::optional<std::pair<std::string, Data>>;
 
