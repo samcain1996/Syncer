@@ -1,7 +1,8 @@
 Syncer syncs a file to a central database.
 
 ## Requirements
-1. Boost
+1. C++ 17 or higher
+2. Boost (https://www.boost.org/)
 
 ## Usage
 Two computers are needed. Computer A will serve as the server and host all the content that will be synced.
@@ -17,7 +18,7 @@ Computer B will serve as the client and upload and download files to Computer A.
 ## Compiling The Code
 ### Example
 Open the terminal in the directory 'Syncer'
-`clang++ -std=c++20 -I /path_to_boost/ -I include/ src/* -o syncer`
+`clang++ -std=c++17 -I /path_to_boost/ -I include/ src/* -o syncer`
 
 ## Running
 Flags:
