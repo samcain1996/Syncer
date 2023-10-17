@@ -43,7 +43,6 @@ struct Connection {
     AcceptorPtr   acceptor;
     error_code    err_code;
 
-    void Disconnect();
     bool SendData(const Data& data);
     bool SendData(const string& data);
     size_t ReceiveData();

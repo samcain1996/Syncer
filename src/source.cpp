@@ -66,9 +66,8 @@ void DownloadClient(string filename) {
 
     File file = client.GetFile(filename);
     if (file != NoFile) {
-        for (auto x : file.value().second) {
-            cout << x;
-        }
+        std::ofstream f(filename);
+        f.write(file.value().second.data(), file.value().second.size());
     }
     cout << "\n";
 

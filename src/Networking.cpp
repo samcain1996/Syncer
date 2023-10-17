@@ -1,7 +1,5 @@
 #include "Networking.hpp"
 
-void Connection::Disconnect() { if (connected) { SendData(DISCONNECT_MESSAGE); } connected = false; }
-
 bool Connection::SendData(const Data& data) {
     
     if (!connected) { return false; }
@@ -88,12 +86,12 @@ File Client::GetFile(const string& filename) {
 
     File file        = NoFile;
     auto& socket     = connection.socket;
-    auto& err_code = connection.err_code;
+    auto& err_code   = connection.err_code;
 
     connection.SendData("download");
     connection.SendData(filename);
 
-    if (err_code != errc::success) { connection.Disconnect(); return file; }
+    if (err_code != errc::success) { return file; }
 
 
         auto bytes_received = connection.ReceiveData();
@@ -132,13 +130,13 @@ Server::~Server() {}
 void Server::Loop() {
 
     auto& socket     = connection.socket;
-    auto& err_code = connection.err_code;
+    auto& err_code   = connection.err_code;
     auto& buf        = connection.buf;
 
-    while(connection.IsConnected()) {
+    while(true) {
 
         auto bytes_received = connection.ReceiveData();
-        if ( connection.IsDisconnectMessage(buf) || err_code != errc::success) { connection.Disconnect(); return; }
+        if ( connection.IsDisconnectMessage(buf) || err_code != errc::success) { return; }
 
         bool download = std::memcmp(buf.data(), "download", bytes_received) == 0;
 
@@ -159,7 +157,9 @@ void Server::Loop() {
             UpdateFile(filename, data); 
         }
 
-        connection.Disconnect();
+        connection.connected = false;
+        connection.socket->close();
+        Listen();
 
     }
 
