@@ -1,5 +1,4 @@
 #include "Networking.hpp"
-#include <cctype>
 
 void Connection::Disconnect() { if (connected) { SendData(DISCONNECT_MESSAGE); } connected = false; }
 
@@ -52,7 +51,7 @@ File ReadFile(const string& filename, const string& folder) {
 
     File file = NoFile;
 
-    ifstream fileStream(folder+filename);
+    fstream fileStream(folder+filename, std::ios_base::in);
     if (fileStream.bad()) { return file; }
     
     Data data;
@@ -170,14 +169,13 @@ void Server::Loop() {
 
 bool Server::UpdateFile( string filename, Data& data) {
 
-    std::fstream file("syncedFiles/"+filename);
+    fstream file("syncedFiles/"+filename, std::ios_base::in);
     if (file.bad()) { return AddFile("syncedFiles/" + filename, data); }
     
     File f = ReadFile(filename);
-    if (ReadFile("cached/"+filename) != NoFile) { if (iswhitfilename[filename.size() - 1]) }
     AddFile("cached/"+filename, f.value().second);
     
-    file = std::fstream("syncedFiles/"+filename, ios_base::out | ios_base::trunc);
+    file = fstream("syncedFiles/"+filename, std::ios_base::out | std::ios_base::trunc);
     file.write((char*)data.data(), data.size());
     file.close();
 
@@ -187,7 +185,7 @@ bool Server::UpdateFile( string filename, Data& data) {
 
 bool Server::AddFile(const string& filename, Data& data) {
 
-    ofstream writer(filename);
+    fstream writer(filename, std::ios_base::out);
     if (writer.bad()) { return false;}
     writer.write((char*)data.data(), data.size());
     writer.close();

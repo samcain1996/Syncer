@@ -1,5 +1,32 @@
 #pragma once
-#include "Defs.hpp"
+
+#include <array>
+#include <vector>
+#include <string>
+#include <optional>
+#include <fstream>
+#include "boost/asio.hpp"
+
+using Data = std::vector<unsigned char>;
+using File = std::optional<std::pair<std::string, Data>>;
+
+using namespace boost::asio;
+using namespace boost::asio::ip;
+using namespace boost::system;
+
+using SocketPtr     = std::unique_ptr<tcp::socket>;
+using AcceptorPtr   = std::unique_ptr<tcp::acceptor>;
+using IO_ServicePtr = std::unique_ptr<boost::asio::io_service>;
+
+using std::string;
+using std::getline;
+using std::make_unique;
+using std::fstream;
+
+static constexpr const int BUFFER_SIZE = 2048;
+static constexpr const std::nullopt_t NoFile = std::nullopt;
+
+using Buffer = std::array<char, BUFFER_SIZE>;
 
 File ReadFile(const string& filename, const string& folder="syncedFiles/");
 

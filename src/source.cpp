@@ -1,11 +1,18 @@
 
+#include <iostream>
 #include "Networking.hpp"
+
+
+using Args = std::vector<std::string>;
+
+using std::cout;
+using std::cerr;
 
 string ExtractConfig(string configName, const string& defaultValue="") {
 
     string config = defaultValue;
     if (configName.back() != '=') { configName += "="; }
-    ifstream inputStream("res/syncer.config");
+    fstream inputStream("res/syncer.config", std::ios_base::in);
 
     string line;
     while (getline(inputStream, line)) {
