@@ -33,8 +33,16 @@ string GetPort() {
     return ExtractConfig("port", "0");
 }
 
+string GetArchiveFolder() {
+    return ExtractConfig("archive_folder", "archived");
+}
+
+string GetSaveFolder() {
+    return ExtractConfig("save_folder", "saved");
+}
+
 void StartServer() {
-    Server server(GetPort());
+    Server server(GetPort(), GetArchiveFolder(), GetSaveFolder());
     if (!server.Listen()) {
         cerr << "Failed to connect\n";
         return;
@@ -45,7 +53,7 @@ void StartServer() {
 }
 
 void UploadClient(string filename) {
-    Client client;
+    Client client(GetArchiveFolder(), GetSaveFolder());
     if (!client.Connect(GetIpAddress(), GetPort())) {
         cerr << "Failed to connect\n";
         return;
@@ -57,7 +65,7 @@ void UploadClient(string filename) {
 }
 
 void DownloadClient(string filename) {
-    Client client;
+    Client client(GetArchiveFolder(), GetSaveFolder());
     if (!client.Connect(GetIpAddress(), GetPort())) {
         cerr << "Failed to connect\n";
         return;
