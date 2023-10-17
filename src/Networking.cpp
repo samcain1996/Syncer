@@ -1,5 +1,5 @@
 #include "Networking.hpp"
-
+#include <cctype>
 
 void Connection::Disconnect() { if (connected) { SendData(DISCONNECT_MESSAGE); } connected = false; }
 
@@ -152,12 +152,13 @@ void Server::Loop() {
             connection.SendData(f.value().second);
         }
 
-        else { 
+        else {
+             
             bytes_received = connection.ReceiveData();
 
             Data data; 
             std::copy(buf.begin(), buf.begin() + bytes_received, back_inserter(data)); 
-            AddFile(filename, data); 
+            UpdateFile(filename, data); 
         }
 
         connection.Disconnect();
@@ -166,11 +167,30 @@ void Server::Loop() {
 
 }
 
+
+bool Server::UpdateFile( string filename, Data& data) {
+
+    std::fstream file("syncedFiles/"+filename);
+    if (file.bad()) { return AddFile("syncedFiles/" + filename, data); }
+    
+    File f = ReadFile(filename);
+    if (ReadFile("cached/"+filename) != NoFile) { if (iswhitfilename[filename.size() - 1]) }
+    AddFile("cached/"+filename, f.value().second);
+    
+    file = std::fstream("syncedFiles/"+filename, ios_base::out | ios_base::trunc);
+    file.write((char*)data.data(), data.size());
+    file.close();
+
+    return true;
+
+}
+
 bool Server::AddFile(const string& filename, Data& data) {
 
-    ofstream writer("syncedFiles/"+filename);
+    ofstream writer(filename);
     if (writer.bad()) { return false;}
     writer.write((char*)data.data(), data.size());
+    writer.close();
     return true;
 
 }

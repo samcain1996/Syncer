@@ -49,6 +49,7 @@ struct Server {
 
     bool Listen();
     void Loop();
+    bool UpdateFile(string filename, Data& data);
     bool AddFile(const string& filename, Data& data);
 };
 
