@@ -1,37 +1,30 @@
 
-#include "Client.hpp"
-#include "Server.hpp"
+#include "Networking.hpp"
 
-string GetIpAddress() {
-    string ip = "0.0.0.0";
-    string delim = "ip=";
+string ExtractConfig(string configName, const string& defaultValue="") {
+
+    string config = defaultValue;
+    if (configName.back() != '=') { configName += "="; }
     ifstream inputStream("res/syncer.config");
 
     string line;
     while (getline(inputStream, line)) {
-        if (line.find(delim) != line.npos) {
-            ip = line.substr(line.find(delim) + delim.size());
+        if (line.find(configName) != line.npos) {
+            config = line.substr(line.find(configName) + configName.size());
             break;
         }
     }
 
-    return ip;
+    return config;
+
+}
+
+string GetIpAddress() {
+    return ExtractConfig("ip", "0.0.0.0");
 }
 
 string GetPort() {
-    string port = "0";
-    string delim = "port=";
-    ifstream inputStream("res/syncer.config");
-
-    string line;
-    while (getline(inputStream, line)) {
-        if (line.find(delim) != line.npos) {
-            port = line.substr(line.find(delim) + delim.size());
-            break;
-        }
-    }
-
-    return port;
+    return ExtractConfig("port", "0");
 }
 
 void StartServer() {
@@ -45,14 +38,14 @@ void StartServer() {
 
 }
 
-void UploadClient() {
+void UploadClient(string filename) {
     Client client;
     if (!client.Connect(GetIpAddress(), GetPort())) {
         cerr << "Failed to connect\n";
         return;
     }
 
-    client.GetFile(false, "NewTest");
+    client.UploadFile(filename);
     
     
 }
@@ -64,7 +57,7 @@ void DownloadClient(string filename) {
         return;
     }
 
-    File file = client.GetFile(true, filename);
+    File file = client.GetFile(filename);
     if (file != NoFile) {
         for (auto x : file.value().second) {
             cout << x;
@@ -78,17 +71,21 @@ int main(int argc, char** argv) {
 
     if (argc <= 1) { return -1; }
 
-    string flag = argv[1];
+    Args args;
+    for (int i = 1; i < argc; ++i) {
+        args.push_back(argv[i]);
+    }
 
-    if (flag == "s") { 
+    string command = args[0];
+
+    if (command == "s") { 
         StartServer();
     }
-    else if (flag == "d") {
-        string filename = argv[2];
-        DownloadClient(filename);
+    else if (command == "d") {
+        DownloadClient(args[1]);
     } 
     else {
-        UploadClient();
+        UploadClient(args[1]);
     }
 
     return 0;
