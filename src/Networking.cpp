@@ -1,9 +1,9 @@
 #include "Networking.hpp"
 
 
-void Connection::Disconnect() { connected = false; }
+void Connection::Disconnect() { if (connected) { SendData(DISCONNECT_MESSAGE); } connected = false; }
 
-bool Connection::SendData(Data& data) {
+bool Connection::SendData(const Data& data) {
     
     if (!connected) { return false; }
 
@@ -32,7 +32,10 @@ size_t Connection::ReceiveData() {
    if (!connected) { return -1; }
 
     auto bytes = socket->receive(buffer(buf), 0, error_code);
-    socket->send(buffer(ACK_MESSAGE), 0, error_code);
+    auto msg = ACK_MESSAGE;
+    if (IsDisconnectMessage(buf)) { msg = DISCONNECT_MESSAGE; connected = false; }
+
+    socket->send(buffer(msg), 0, error_code);
 
     if (error_code == errc::success) { return bytes; }
     return -1;
@@ -40,6 +43,10 @@ size_t Connection::ReceiveData() {
 }
 
 bool Connection::IsConnected() const { return connected; }
+
+bool Connection::IsDisconnectMessage(const Buffer& message) const { 
+    return std::memcmp(DISCONNECT_MESSAGE.data(), message.data(), DISCONNECT_MESSAGE.size()) == 0;
+}
 
 File ReadFile(const string& filename, const string& folder) {
 
@@ -133,8 +140,7 @@ void Server::Loop() {
     while(connection.IsConnected()) {
 
         auto bytes_received = connection.ReceiveData();
-        if (std::memcmp(connection.DISCONNECT_MESSAGE.data(), buf.data(), connection.DISCONNECT_MESSAGE.size()) == 0 ||
-            error_code != errc::success) { connection.Disconnect(); return; }
+        if ( connection.IsDisconnectMessage(buf) || error_code != errc::success) { connection.Disconnect(); return; }
 
         bool download = std::memcmp(buf.data(), "download", bytes_received) == 0;
 

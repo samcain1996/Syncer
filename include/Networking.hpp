@@ -17,11 +17,12 @@ struct Connection {
     boost::system::error_code error_code;
 
     void Disconnect();
-    bool SendData(Data& data);
+    bool SendData(const Data& data);
     bool SendData(const string& data);
     size_t ReceiveData();
 
     bool IsConnected() const;
+    bool IsDisconnectMessage(const Buffer& message) const;
 
 };
 
