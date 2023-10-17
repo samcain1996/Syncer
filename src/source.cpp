@@ -42,7 +42,7 @@ string GetSaveFolder() {
 }
 
 void StartServer() {
-    Server server(GetPort(), GetArchiveFolder(), GetSaveFolder());
+    Server server(GetPort());
     if (!server.Listen()) {
         cerr << "Failed to connect\n";
         return;
@@ -53,7 +53,7 @@ void StartServer() {
 }
 
 void UploadClient(string filename) {
-    Client client(GetArchiveFolder(), GetSaveFolder());
+    Client client;
     if (!client.Connect(GetIpAddress(), GetPort())) {
         cerr << "Failed to connect\n";
         return;
@@ -65,7 +65,7 @@ void UploadClient(string filename) {
 }
 
 void DownloadClient(string filename) {
-    Client client(GetArchiveFolder(), GetSaveFolder());
+    Client client;
     if (!client.Connect(GetIpAddress(), GetPort())) {
         cerr << "Failed to connect\n";
         return;
@@ -87,6 +87,9 @@ int main(int argc, char** argv) {
     for (int i = 1; i < argc; ++i) {
         args.push_back(argv[i]);
     }
+
+    Connection::SAVE_FOLDER    = GetSaveFolder();
+    Connection::ARCHIVE_FOLDER = GetArchiveFolder();
 
     string command = args[0];
 

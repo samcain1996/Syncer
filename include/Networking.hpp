@@ -7,7 +7,7 @@
 #include <fstream>
 #include "boost/asio.hpp"
 
-using Data = std::vector<unsigned char>;
+using Data = std::vector<char>;
 using File = std::optional<std::pair<std::string, Data>>;
 
 using namespace boost::asio;
@@ -59,7 +59,7 @@ struct Client {
 
     Connection connection;
 
-    Client(const string& archive_folder, const string& save_folder);
+    Client();
     ~Client();
 
     bool Connect(const string& address, const string& port);
@@ -73,7 +73,7 @@ struct Server {
     
     Connection connection;
     
-    Server(const string& port, const string& archive_folder, const string& save_folder);
+    Server(const string& port);
     ~Server();
 
     bool Listen();

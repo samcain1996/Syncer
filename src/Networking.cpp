@@ -22,16 +22,7 @@ bool Connection::HasAcknowledged() const {
 
 bool Connection::SendData(const string& data) {
     
-    if (!connected) { return false; }
-
-    auto size = data.size();
-
-    socket->send(buffer(std::to_string(size)), 0, err_code);
-    socket->receive(buffer(buf), 0, err_code);
-
-    write(*socket, buffer(data, size));
-
-    return (err_code == errc::success && HasAcknowledged());
+    return SendData(Data(data.begin(), data.end()));
 
 }
 
@@ -48,9 +39,7 @@ Data Connection::ReceiveData() {
     while (size > 0) {
 
         auto bytes_to_receive = size >= BUFFER_SIZE ? BUFFER_SIZE : size;
-        //auto actual = read(*socket, buffer(buf));
         size -= read(*socket, buffer(buf, size));
-       // size -= actual;
 
         std::copy(buf.begin(), buf.begin() + bytes_to_receive, back_inserter(data));
     }
@@ -84,26 +73,20 @@ File ReadFile(const string& filename, const string& folder) {
     return file;
 }
 
-Client::Client(const string& archive_folder, const string& save_folder) {
+Client::Client() {
 
-    connection.SAVE_FOLDER = save_folder;
-    connection.ARCHIVE_FOLDER = archive_folder;
-
-    connection.io_service = std::make_unique<boost::asio::io_service>();
-    connection.socket     = std::make_unique<tcp::socket>(*connection.io_service);
+    connection.io_service = make_unique<boost::asio::io_service>();
+    connection.socket     = make_unique<tcp::socket>(*connection.io_service);
 
 }
-Client::~Client() {
 
-
-}
+Client::~Client() {}
 
 bool Client::UploadFile(const string& filename) {
 
     connection.SendData("upload");
     connection.SendData(filename);
-    File f = ReadFile(filename, "");
-    connection.SendData(f.value().second);
+    connection.SendData(ReadFile(filename).value().second);
 
     return true;
 }
@@ -136,14 +119,11 @@ bool Client::Connect(const string& address, const string& port) {
 
 }
 
-Server::Server(const string& port, const string& archive_folder, const string& save_folder) {
+Server::Server(const string& port) {
 
-    connection.SAVE_FOLDER = save_folder;
-    connection.ARCHIVE_FOLDER = archive_folder;
-
-    connection.io_service = std::make_unique<io_service>();
-    connection.acceptor   = std::make_unique<tcp::acceptor>(*connection.io_service, tcp::endpoint(tcp::v4(), std::stoi(port)));
-    connection.socket     = std::make_unique<tcp::socket>(*connection.io_service);
+    connection.io_service = make_unique<io_service>();
+    connection.acceptor   = make_unique<tcp::acceptor>(*connection.io_service, tcp::endpoint(tcp::v4(), std::stoi(port)));
+    connection.socket     = make_unique<tcp::socket>(*connection.io_service);
 
 }
 
@@ -193,7 +173,7 @@ bool Server::UpdateFile(const string& filename, Data& data) {
     AddFile(connection.ARCHIVE_FOLDER+filename, f.value().second);
     
     std::ofstream file2(connection.SAVE_FOLDER+filename, std::ios_base::binary);
-    file2.write((char*)data.data(), data.size());
+    file2.write(data.data(), data.size());
     file2.close();
 
     return true;
@@ -204,7 +184,7 @@ bool Server::AddFile(const string& filename, Data& data) {
 
     std::ofstream writer(filename, std::ios_base::binary);
     if (writer.bad()) { return false;}
-    writer.write((char*)data.data(), data.size());
+    writer.write(data.data(), data.size());
     writer.close();
     return true;
 
