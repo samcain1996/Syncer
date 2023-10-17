@@ -75,8 +75,8 @@ File ReadFile(const string& filename, const string& folder) {
 
 Client::Client() {
 
-    connection.io_service = make_unique<boost::asio::io_service>();
-    connection.socket     = make_unique<tcp::socket>(*connection.io_service);
+    connection.io_context = make_unique<boost::asio::io_context>();
+    connection.socket     = make_unique<tcp::socket>(*connection.io_context);
 
 }
 
@@ -119,11 +119,22 @@ bool Client::Connect(const string& address, const string& port) {
 
 }
 
+bool portOpen(unsigned short port) {
+    io_context i;
+    tcp::acceptor a(i);
+    error_code ec;
+    a.open(tcp::v4(), ec) || a.bind( { tcp::v4(), port }, ec);
+    return (ec != boost::asio::error::address_in_use);
+}
+
 Server::Server(const string& port) {
 
-    connection.io_service = make_unique<io_service>();
-    connection.acceptor   = make_unique<tcp::acceptor>(*connection.io_service, tcp::endpoint(tcp::v4(), std::stoi(port)));
-    connection.socket     = make_unique<tcp::socket>(*connection.io_service);
+    unsigned short p = std::stoi(port);
+
+    connection.io_context = make_unique<io_context>();
+    while (!portOpen(p)) { p++; }
+    connection.acceptor   = make_unique<tcp::acceptor>(*connection.io_context, tcp::endpoint(tcp::v4(), p));
+    connection.socket     = make_unique<tcp::socket>(*connection.io_context);
 
 }
 

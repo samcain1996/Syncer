@@ -16,7 +16,7 @@ using namespace boost::system;
 
 using SocketPtr     = std::unique_ptr<tcp::socket>;
 using AcceptorPtr   = std::unique_ptr<tcp::acceptor>;
-using IO_ServicePtr = std::unique_ptr<boost::asio::io_service>;
+using IO_ContextPtr = std::unique_ptr<boost::asio::io_context>;
 
 using std::string;
 using std::getline;
@@ -40,7 +40,9 @@ struct Connection {
     Buffer buf;
     bool connected = false;
 
-    IO_ServicePtr io_service;
+    static bool portOpen(unsigned short port);
+
+    IO_ContextPtr io_context;
     SocketPtr     socket;
     AcceptorPtr   acceptor;
     error_code    err_code;
