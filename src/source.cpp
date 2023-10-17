@@ -2,7 +2,6 @@
 #include <iostream>
 #include "Networking.hpp"
 
-
 using Args = std::vector<std::string>;
 
 using std::cout;

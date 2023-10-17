@@ -168,13 +168,13 @@ void Server::Loop() {
 
 bool Server::UpdateFile(const string& filename, Data& data) {
 
-    fstream file("syncedFiles/"+filename, std::ios_base::in);
-    if (file.bad()) { return AddFile("syncedFiles/" + filename, data); }
+    fstream file("saved/"+filename, std::ios_base::in);
+    if (file.bad()) { return AddFile("saved/" + filename, data); }
     
     File f = ReadFile(filename);
-    AddFile("cached/"+filename, f.value().second);
+    AddFile("archived/"+filename, f.value().second);
     
-    file = fstream("syncedFiles/"+filename, std::ios_base::out | std::ios_base::trunc);
+    file = fstream("saved/"+filename, std::ios_base::out | std::ios_base::trunc);
     file.write(data.data(), data.size());
     file.close();
 

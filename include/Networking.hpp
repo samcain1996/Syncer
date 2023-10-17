@@ -28,7 +28,7 @@ static constexpr const std::nullopt_t NoFile = std::nullopt;
 
 using Buffer = std::array<char, BUFFER_SIZE>;
 
-File ReadFile(const string& filename, const string& folder="syncedFiles/");
+File ReadFile(const string& filename, const string& folder="saved/");
 
 struct Connection {
 

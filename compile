@@ -1,2 +1,0 @@
-clear;
-clang++ -std=c++2b -g -I/home/scain/Documents/Code/Syncer/include -I/home/scain/Documents/Code/boost_1_83_0 src/*.cpp -o syncer
