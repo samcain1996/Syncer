@@ -2,14 +2,16 @@
 
 void Connection::Disconnect() { if (connected) { SendData(DISCONNECT_MESSAGE); } connected = false; }
 
+Connection::Connection() { connected = false; }
+
 bool Connection::SendData(const Data& data) {
     
     if (!connected) { return false; }
 
-    socket->send(buffer(data), 0, error_code);
-    socket->receive(buffer(buf), 0, error_code);
+    socket->send(buffer(data), 0, err_code);
+    socket->receive(buffer(buf), 0, err_code);
 
-    return (error_code == errc::success && std::memcmp(buf.data(), ACK_MESSAGE.data(), ACK_MESSAGE.size()) != 0);
+    return (err_code == errc::success && std::memcmp(buf.data(), ACK_MESSAGE.data(), ACK_MESSAGE.size()) != 0);
 
 
 }
@@ -18,11 +20,10 @@ bool Connection::SendData(const string& data) {
     
     if (!connected) { return false; }
 
-    socket->send(buffer(data), 0, error_code);
-    socket->receive(buffer(buf), 0, error_code);
+    socket->send(buffer(data), 0, err_code);
+    socket->receive(buffer(buf), 0, err_code);
 
-    return (error_code == errc::success && std::memcmp(buf.data(), ACK_MESSAGE.data(), ACK_MESSAGE.size()) != 0);
-
+    return (err_code == errc::success && std::memcmp(buf.data(), ACK_MESSAGE.data(), ACK_MESSAGE.size()) != 0);
 
 }
 
@@ -30,13 +31,13 @@ size_t Connection::ReceiveData() {
 
    if (!connected) { return -1; }
 
-    auto bytes = socket->receive(buffer(buf), 0, error_code);
+    auto bytes = socket->receive(buffer(buf), 0, err_code);
     auto msg = ACK_MESSAGE;
     if (IsDisconnectMessage(buf)) { msg = DISCONNECT_MESSAGE; connected = false; }
 
-    socket->send(buffer(msg), 0, error_code);
+    socket->send(buffer(msg), 0, err_code);
 
-    if (error_code == errc::success) { return bytes; }
+    if (err_code == errc::success) { return bytes; }
     return -1;
 
 }
@@ -75,7 +76,7 @@ Client::~Client() {
 
 }
 
-bool Client::UploadFile(string filename) {
+bool Client::UploadFile(const string& filename) {
 
     connection.SendData("upload");
     connection.SendData(filename);
@@ -85,20 +86,20 @@ bool Client::UploadFile(string filename) {
     return true;
 }
 
-File Client::GetFile(string filename) {
+File Client::GetFile(const string& filename) {
 
     File file        = NoFile;
     auto& socket     = connection.socket;
-    auto& error_code = connection.error_code;
+    auto& err_code = connection.err_code;
 
     connection.SendData("download");
     connection.SendData(filename);
 
-    if (error_code != errc::success) { connection.Disconnect(); return file; }
+    if (err_code != errc::success) { connection.Disconnect(); return file; }
 
 
         auto bytes_received = connection.ReceiveData();
-        if (error_code != errc::success) { return file; }
+        if (err_code != errc::success) { return file; }
 
         Data data;
         std::copy(connection.buf.begin(), connection.buf.begin() + bytes_received, back_inserter(data));
@@ -113,9 +114,9 @@ File Client::GetFile(string filename) {
 bool Client::Connect(const string& address, const string& port) {
 
     tcp::endpoint endpoint(address::from_string(address), std::stoi(port));
-    connection.socket->connect(endpoint, connection.error_code);
+    connection.socket->connect(endpoint, connection.err_code);
 
-    connection.connected = connection.error_code == errc::success;
+    connection.connected = connection.err_code == errc::success;
     return connection.IsConnected();
 
 }
@@ -133,13 +134,13 @@ Server::~Server() {}
 void Server::Loop() {
 
     auto& socket     = connection.socket;
-    auto& error_code = connection.error_code;
+    auto& err_code = connection.err_code;
     auto& buf        = connection.buf;
 
     while(connection.IsConnected()) {
 
         auto bytes_received = connection.ReceiveData();
-        if ( connection.IsDisconnectMessage(buf) || error_code != errc::success) { connection.Disconnect(); return; }
+        if ( connection.IsDisconnectMessage(buf) || err_code != errc::success) { connection.Disconnect(); return; }
 
         bool download = std::memcmp(buf.data(), "download", bytes_received) == 0;
 
@@ -167,7 +168,7 @@ void Server::Loop() {
 }
 
 
-bool Server::UpdateFile( string filename, Data& data) {
+bool Server::UpdateFile(const string& filename, Data& data) {
 
     fstream file("syncedFiles/"+filename, std::ios_base::in);
     if (file.bad()) { return AddFile("syncedFiles/" + filename, data); }
@@ -176,7 +177,7 @@ bool Server::UpdateFile( string filename, Data& data) {
     AddFile("cached/"+filename, f.value().second);
     
     file = fstream("syncedFiles/"+filename, std::ios_base::out | std::ios_base::trunc);
-    file.write((char*)data.data(), data.size());
+    file.write(data.data(), data.size());
     file.close();
 
     return true;
@@ -187,7 +188,7 @@ bool Server::AddFile(const string& filename, Data& data) {
 
     fstream writer(filename, std::ios_base::out);
     if (writer.bad()) { return false;}
-    writer.write((char*)data.data(), data.size());
+    writer.write(data.data(), data.size());
     writer.close();
     return true;
 
@@ -195,8 +196,8 @@ bool Server::AddFile(const string& filename, Data& data) {
 
 bool Server::Listen() {
 
-    connection.acceptor->accept(*connection.socket, connection.error_code);
-    connection.connected = connection.error_code == errc::success;
+    connection.acceptor->accept(*connection.socket, connection.err_code);
+    connection.connected = connection.err_code == errc::success;
 
     return connection.IsConnected();
     

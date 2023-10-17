@@ -7,7 +7,7 @@
 #include <fstream>
 #include "boost/asio.hpp"
 
-using Data = std::vector<unsigned char>;
+using Data = std::vector<char>;
 using File = std::optional<std::pair<std::string, Data>>;
 
 using namespace boost::asio;
@@ -36,12 +36,12 @@ struct Connection {
     static inline const Data ACK_MESSAGE        = { 'A', 'C', 'K' };
 
     Buffer buf;
+    bool connected;
 
-    bool connected = false;
     IO_ServicePtr io_service;
     SocketPtr     socket;
     AcceptorPtr   acceptor;
-    boost::system::error_code error_code;
+    error_code    err_code;
 
     void Disconnect();
     bool SendData(const Data& data);
@@ -62,8 +62,8 @@ struct Client {
 
     bool Connect(const string& address, const string& port);
 
-    File GetFile(string filename);
-    bool UploadFile(string filename);
+    File GetFile(const string& filename);
+    bool UploadFile(const string& filename);
 
 };
 
@@ -76,7 +76,7 @@ struct Server {
 
     bool Listen();
     void Loop();
-    bool UpdateFile(string filename, Data& data);
+    bool UpdateFile(const string& filename, Data& data);
     bool AddFile(const string& filename, Data& data);
 };
 
