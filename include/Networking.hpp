@@ -36,7 +36,7 @@ struct Connection {
     static inline const Data ACK_MESSAGE        = { 'A', 'C', 'K' };
 
     Buffer buf;
-    bool connected;
+    bool connected = false;
 
     IO_ServicePtr io_service;
     SocketPtr     socket;

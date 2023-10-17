@@ -2,8 +2,6 @@
 
 void Connection::Disconnect() { if (connected) { SendData(DISCONNECT_MESSAGE); } connected = false; }
 
-Connection::Connection() { connected = false; }
-
 bool Connection::SendData(const Data& data) {
     
     if (!connected) { return false; }
