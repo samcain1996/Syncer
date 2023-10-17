@@ -22,6 +22,11 @@ using std::string;
 using std::getline;
 using std::make_unique;
 using std::fstream;
+using std::copy;
+using std::ifstream;
+using std::ofstream;
+using std::ios_base;
+using std::to_string;
 
 static constexpr const size_t BUFFER_SIZE = 2048;
 static constexpr const std::nullopt_t NoFile = std::nullopt;
@@ -37,10 +42,10 @@ struct Connection {
     static inline string ARCHIVE_FOLDER;
     static inline string SAVE_FOLDER;
 
+    static bool portOpen(unsigned short port);
+    
     Buffer buf;
     bool connected = false;
-
-    static bool portOpen(unsigned short port);
 
     IO_ContextPtr io_context;
     SocketPtr     socket;
@@ -48,7 +53,6 @@ struct Connection {
     error_code    err_code;
 
     bool SendData(const Data& data);
-    bool SendData(const string& data);
     Data ReceiveData();
 
     bool IsConnected() const;
@@ -62,10 +66,8 @@ struct Client {
     Connection connection;
 
     Client();
-    ~Client();
 
     bool Connect(const string& address, const string& port);
-
     File GetFile(const string& filename);
     bool UploadFile(const string& filename);
 
@@ -76,7 +78,6 @@ struct Server {
     Connection connection;
     
     Server(const string& port);
-    ~Server();
 
     bool Listen();
     void Loop();
