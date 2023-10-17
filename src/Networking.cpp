@@ -35,27 +35,7 @@ bool Connection::SendData(const string& data) {
 
 }
 
-size_t Connection::ReceiveData() {
-
-   if (!connected) { return -1; }
-
-    auto bytes = socket->receive(buffer(buf), 0, err_code);
-    auto msg = ACK_MESSAGE;
-    if (IsDisconnectMessage(buf)) { msg = DISCONNECT_MESSAGE; connected = false; }
-
-    string s;
-    for (int i = 0; i < bytes; i++) {
-        s += buf[i];
-    }
-    socket->send(buffer(msg), 0, err_code);
-    bytes = read(*socket, buffer(buf, std::stoi(s)));
-
-    if (err_code == errc::success) { return bytes; }
-    return -1;
-
-}
-
-Data Connection::ReceiveDatar() {
+Data Connection::ReceiveData() {
 
    if (!connected) { return Data(); }
 
@@ -141,15 +121,8 @@ File Client::GetFile(const string& filename) {
 
     if (err_code != errc::success) { return file; }
 
-
-        auto bytes_received = connection.ReceiveData();
-        if (err_code != errc::success) { return file; }
-
-        Data data;
-        std::copy(connection.buf.begin(), connection.buf.begin() + bytes_received, back_inserter(data));
+        Data data = connection.ReceiveData();
         file = make_pair(filename, data);
-
-
 
     return file;
 
@@ -186,13 +159,13 @@ void Server::Loop() {
 
     while(true) {
 
-        auto bytes_received = connection.ReceiveData();
+        Data data = connection.ReceiveData();
         if ( connection.IsDisconnectMessage(buf) || err_code != errc::success) { return; }
 
-        bool download = std::memcmp(buf.data(), "download", bytes_received) == 0;
+        bool download = std::memcmp(data.data(), "download", data.size()) == 0;
 
-        bytes_received = connection.ReceiveData();
-        string filename(buf.begin(), buf.begin() + bytes_received);
+        data = connection.ReceiveData();
+        string filename(data.begin(), data.end());
 
         if (download) {     
             File f = ReadFile(filename);
@@ -200,7 +173,7 @@ void Server::Loop() {
         }
 
         else {
-            Data data = connection.ReceiveDatar();
+            Data data = connection.ReceiveData();
             UpdateFile(filename, data); 
         }
 

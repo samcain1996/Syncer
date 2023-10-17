@@ -23,7 +23,7 @@ using std::getline;
 using std::make_unique;
 using std::fstream;
 
-static constexpr const size_t BUFFER_SIZE = INT32_MAX;
+static constexpr const size_t BUFFER_SIZE = 2048;
 static constexpr const std::nullopt_t NoFile = std::nullopt;
 
 using Buffer = std::array<char, BUFFER_SIZE>;
@@ -34,6 +34,8 @@ struct Connection {
 
     static inline const Data DISCONNECT_MESSAGE = { 'B', 'Y', 'E', '!' };
     static inline const Data ACK_MESSAGE        = { 'A', 'C', 'K' };
+    static inline string ARCHIVE_FOLDER;
+    static inline string SAVE_FOLDER;
 
     Buffer buf;
     bool connected = false;
@@ -45,10 +47,11 @@ struct Connection {
 
     bool SendData(const Data& data);
     bool SendData(const string& data);
-    size_t ReceiveData();
+    Data ReceiveData();
 
     bool IsConnected() const;
     bool IsDisconnectMessage(const Buffer& message) const;
+    bool HasAcknowledged() const;
 
 };
 
@@ -56,7 +59,7 @@ struct Client {
 
     Connection connection;
 
-    Client();
+    Client(const string& archive_folder, const string& save_folder);
     ~Client();
 
     bool Connect(const string& address, const string& port);
@@ -70,7 +73,7 @@ struct Server {
     
     Connection connection;
     
-    Server(const string& port);
+    Server(const string& port, const string& archive_folder, const string& save_folder);
     ~Server();
 
     bool Listen();
