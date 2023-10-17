@@ -23,7 +23,7 @@ using std::getline;
 using std::make_unique;
 using std::fstream;
 
-static constexpr const int BUFFER_SIZE = 2048;
+static constexpr const size_t BUFFER_SIZE = INT32_MAX;
 static constexpr const std::nullopt_t NoFile = std::nullopt;
 
 using Buffer = std::array<char, BUFFER_SIZE>;

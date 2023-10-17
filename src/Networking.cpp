@@ -4,8 +4,12 @@ bool Connection::SendData(const Data& data) {
     
     if (!connected) { return false; }
 
-    socket->send(buffer(data), 0, err_code);
+    auto size = data.size();
+    
+    socket->send(buffer(std::to_string(size)), 0, err_code);
     socket->receive(buffer(buf), 0, err_code);
+
+    write(*socket, buffer(data, size));
 
     return (err_code == errc::success && std::memcmp(buf.data(), ACK_MESSAGE.data(), ACK_MESSAGE.size()) != 0);
 
@@ -16,8 +20,12 @@ bool Connection::SendData(const string& data) {
     
     if (!connected) { return false; }
 
-    socket->send(buffer(data), 0, err_code);
+    auto size = data.size();
+
+    socket->send(buffer(std::to_string(size)), 0, err_code);
     socket->receive(buffer(buf), 0, err_code);
+
+    write(*socket, buffer(data, size));
 
     return (err_code == errc::success && std::memcmp(buf.data(), ACK_MESSAGE.data(), ACK_MESSAGE.size()) != 0);
 
@@ -31,7 +39,12 @@ size_t Connection::ReceiveData() {
     auto msg = ACK_MESSAGE;
     if (IsDisconnectMessage(buf)) { msg = DISCONNECT_MESSAGE; connected = false; }
 
+    string s;
+    for (int i = 0; i < bytes; i++) {
+        s += buf[i];
+    }
     socket->send(buffer(msg), 0, err_code);
+    bytes = read(*socket, buffer(buf, std::stoi(s)));
 
     if (err_code == errc::success) { return bytes; }
     return -1;
@@ -48,7 +61,7 @@ File ReadFile(const string& filename, const string& folder) {
 
     File file = NoFile;
 
-    fstream fileStream(folder+filename, std::ios_base::in | std::ios_base::binary);
+    std::ifstream fileStream(folder+filename, std::ios_base::binary);
     if (fileStream.bad()) { return file; }
     
     Data data;
@@ -168,15 +181,15 @@ void Server::Loop() {
 
 bool Server::UpdateFile(const string& filename, Data& data) {
 
-    fstream file("saved/"+filename, std::ios_base::in | std::ios_base::binary);
+    std::ifstream file("saved/"+filename,  std::ios_base::binary);
     if (file.bad()) { return AddFile("saved/" + filename, data); }
     
     File f = ReadFile(filename);
     AddFile("archived/"+filename, f.value().second);
     
-    file = fstream("saved/"+filename, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
-    file.write(data.data(), data.size());
-    file.close();
+    std::ofstream file2("saved/"+filename, std::ios_base::binary);
+    file2.write(data.data(), data.size());
+    file2.close();
 
     return true;
 
@@ -184,7 +197,7 @@ bool Server::UpdateFile(const string& filename, Data& data) {
 
 bool Server::AddFile(const string& filename, Data& data) {
 
-    fstream writer(filename, std::ios_base::out | std::ios_base::binary);
+    std::ofstream writer(filename, std::ios_base::binary);
     if (writer.bad()) { return false;}
     writer.write(data.data(), data.size());
     writer.close();
