@@ -3,16 +3,13 @@
 bool Connection::SendData(const Data& data) {
     
     if (!connected) { return false; }
-
-    auto size = data.size();
     
-    socket->send(buffer(std::to_string(size)), 0, err_code);
+    socket->send(buffer(std::to_string(data.size())), 0, err_code);
     socket->receive(buffer(buf), 0, err_code);
 
-    write(*socket, buffer(data, size));
+    write(*socket, buffer(data, data.size()));
 
     return (err_code == errc::success && HasAcknowledged());
-
 
 }
 
@@ -30,18 +27,18 @@ Data Connection::ReceiveData() {
 
    if (!connected) { return Data(); }
 
-    auto bytes = socket->receive(buffer(buf), 0, err_code);
-    auto size = std::stoi(string(buf.begin(), buf.begin() + bytes));
+    auto bytes_received = socket->receive(buffer(buf), 0, err_code);
+    auto bytes_expected = std::stoi(string(buf.begin(), buf.begin() + bytes_received));
 
     socket->send(buffer(ACK_MESSAGE), 0, err_code);
 
     Data data;
-    while (size > 0) {
+    while (bytes_expected > 0) {
 
-        auto bytes_to_receive = size >= BUFFER_SIZE ? BUFFER_SIZE : size;
-        size -= read(*socket, buffer(buf, size));
+        bytes_received = bytes_expected >= BUFFER_SIZE ? BUFFER_SIZE : bytes_expected;
+        bytes_expected -= read(*socket, buffer(buf, bytes_received));
 
-        std::copy(buf.begin(), buf.begin() + bytes_to_receive, back_inserter(data));
+        std::copy(buf.begin(), buf.begin() + bytes_received, back_inserter(data));
     }
 
     if (err_code == errc::success) { return data; }
@@ -86,7 +83,7 @@ bool Client::UploadFile(const string& filename) {
 
     connection.SendData("upload");
     connection.SendData(filename);
-    connection.SendData(ReadFile(filename).value().second);
+    connection.SendData(ReadFile(filename, "").value().second);
 
     return true;
 }
@@ -94,13 +91,11 @@ bool Client::UploadFile(const string& filename) {
 File Client::GetFile(const string& filename) {
 
     File file        = NoFile;
-    auto& socket     = connection.socket;
-    auto& err_code   = connection.err_code;
 
     connection.SendData("download");
     connection.SendData(filename);
 
-    if (err_code != errc::success) { return file; }
+    if (connection.err_code != errc::success) { return file; }
 
         Data data = connection.ReceiveData();
         file = make_pair(filename, data);
@@ -142,15 +137,9 @@ Server::~Server() {}
 
 void Server::Loop() {
 
-    auto& socket     = connection.socket;
-    auto& err_code   = connection.err_code;
-    auto& buf        = connection.buf;
-
     while(true) {
 
         Data data = connection.ReceiveData();
-        if ( connection.IsDisconnectMessage(buf) || err_code != errc::success) { return; }
-
         bool download = std::memcmp(data.data(), "download", data.size()) == 0;
 
         data = connection.ReceiveData();
@@ -178,14 +167,14 @@ void Server::Loop() {
 bool Server::UpdateFile(const string& filename, Data& data) {
 
     std::ifstream file(connection.SAVE_FOLDER+filename,  std::ios_base::binary);
-    if (file.bad()) { return AddFile(connection.SAVE_FOLDER + filename, data); }
+    string tmp;
+    getline(file, tmp);
+    if (file.bad() || tmp.empty()) { return AddFile(connection.SAVE_FOLDER + filename, data); }
     
     File f = ReadFile(filename);
     AddFile(connection.ARCHIVE_FOLDER+filename, f.value().second);
     
-    std::ofstream file2(connection.SAVE_FOLDER+filename, std::ios_base::binary);
-    file2.write(data.data(), data.size());
-    file2.close();
+    std::ofstream(connection.SAVE_FOLDER+filename, std::ios_base::binary).write(data.data(), data.size());
 
     return true;
 
