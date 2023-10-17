@@ -7,7 +7,7 @@
 #include <fstream>
 #include "boost/asio.hpp"
 
-using Data = std::vector<char>;
+using Data = std::vector<unsigned char>;
 using File = std::optional<std::pair<std::string, Data>>;
 
 using namespace boost::asio;

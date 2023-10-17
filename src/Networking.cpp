@@ -40,20 +40,17 @@ Data Connection::ReceiveData() {
    if (!connected) { return Data(); }
 
     auto bytes = socket->receive(buffer(buf), 0, err_code);
-    string s;
-    for (int i = 0; i < bytes; i++) {
-        s += buf[i];
-    }
-    auto msg = ACK_MESSAGE;
-    if (IsDisconnectMessage(buf)) { msg = DISCONNECT_MESSAGE; connected = false; }
-    socket->send(buffer(msg), 0, err_code);
+    auto size = std::stoi(string(buf.begin(), buf.begin() + bytes));
+
+    socket->send(buffer(ACK_MESSAGE), 0, err_code);
 
     Data data;
-    auto size = std::stoi(s);
     while (size > 0) {
 
-        auto bytes_to_receive = size > BUFFER_SIZE ? BUFFER_SIZE : size;
+        auto bytes_to_receive = size >= BUFFER_SIZE ? BUFFER_SIZE : size;
+        //auto actual = read(*socket, buffer(buf));
         size -= read(*socket, buffer(buf, size));
+       // size -= actual;
 
         std::copy(buf.begin(), buf.begin() + bytes_to_receive, back_inserter(data));
     }
@@ -80,6 +77,7 @@ File ReadFile(const string& filename, const string& folder) {
     string line;
     while (getline(fileStream, line)) {
         std::copy(line.begin(), line.end(), back_inserter(data));
+        data.push_back('\n');
     }
     file = { filename, data };
 
@@ -195,7 +193,7 @@ bool Server::UpdateFile(const string& filename, Data& data) {
     AddFile(connection.ARCHIVE_FOLDER+filename, f.value().second);
     
     std::ofstream file2(connection.SAVE_FOLDER+filename, std::ios_base::binary);
-    file2.write(data.data(), data.size());
+    file2.write((char*)data.data(), data.size());
     file2.close();
 
     return true;
@@ -206,7 +204,7 @@ bool Server::AddFile(const string& filename, Data& data) {
 
     std::ofstream writer(filename, std::ios_base::binary);
     if (writer.bad()) { return false;}
-    writer.write(data.data(), data.size());
+    writer.write((char*)data.data(), data.size());
     writer.close();
     return true;
 

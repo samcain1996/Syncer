@@ -76,7 +76,6 @@ void DownloadClient(string filename) {
         std::ofstream f(filename);
         f.write(file.value().second.data(), file.value().second.size());
     }
-    cout << "\n";
 
 }
 
@@ -97,8 +96,12 @@ int main(int argc, char** argv) {
     else if (command == "d") {
         DownloadClient(args[1]);
     } 
-    else {
+    else if (command == "u") {
         UploadClient(args[1]);
+    }
+    else {
+        cerr << "Invalid command\n";
+        return -2;
     }
 
     return 0;
