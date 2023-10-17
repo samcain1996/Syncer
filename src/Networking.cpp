@@ -48,7 +48,7 @@ File ReadFile(const string& filename, const string& folder) {
 
     File file = NoFile;
 
-    fstream fileStream(folder+filename, std::ios_base::in);
+    fstream fileStream(folder+filename, std::ios_base::in | std::ios_base::binary);
     if (fileStream.bad()) { return file; }
     
     Data data;
@@ -168,13 +168,13 @@ void Server::Loop() {
 
 bool Server::UpdateFile(const string& filename, Data& data) {
 
-    fstream file("saved/"+filename, std::ios_base::in);
+    fstream file("saved/"+filename, std::ios_base::in | std::ios_base::binary);
     if (file.bad()) { return AddFile("saved/" + filename, data); }
     
     File f = ReadFile(filename);
     AddFile("archived/"+filename, f.value().second);
     
-    file = fstream("saved/"+filename, std::ios_base::out | std::ios_base::trunc);
+    file = fstream("saved/"+filename, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
     file.write(data.data(), data.size());
     file.close();
 
@@ -184,7 +184,7 @@ bool Server::UpdateFile(const string& filename, Data& data) {
 
 bool Server::AddFile(const string& filename, Data& data) {
 
-    fstream writer(filename, std::ios_base::out);
+    fstream writer(filename, std::ios_base::out | std::ios_base::binary);
     if (writer.bad()) { return false;}
     writer.write(data.data(), data.size());
     writer.close();

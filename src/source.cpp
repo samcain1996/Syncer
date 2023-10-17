@@ -11,7 +11,7 @@ string ExtractConfig(string configName, const string& defaultValue="") {
 
     string config = defaultValue;
     if (configName.back() != '=') { configName += "="; }
-    fstream inputStream("res/syncer.config", std::ios_base::in);
+    fstream inputStream("res/syncer.config", std::ios_base::in | std::ios_base::binary);
 
     string line;
     while (getline(inputStream, line)) {
