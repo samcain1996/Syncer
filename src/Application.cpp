@@ -1,13 +1,12 @@
-#include "Application.hpp"
-
-
 #include <iostream>
+#include "Application.hpp"
 #include "Networking.hpp"
 
 using Args = std::vector<std::string>;
 
 using std::cout;
 using std::cerr;
+using std::clog;
 
 string ExtractConfig(string configName, const string& defaultValue="") {
 
@@ -44,7 +43,9 @@ string GetSaveFolder() {
 }
 
 void StartServer() {
+
     Server server(GetPort());
+    clog << "Server started on port: " << GetPort() << "\n";
     if (!server.Listen()) {
         cerr << "Failed to connect\n";
         return;
@@ -52,6 +53,18 @@ void StartServer() {
     
     server.Loop();
 
+}
+
+void ListServerFiles() {
+
+    Client client;
+    if (!client.Connect(GetIpAddress(), GetPort())) {
+        cerr << "Failed to connect\n";
+        return;
+    }
+
+    string files = client.GetContents();
+    cout << files << "\n";
 }
 
 void UploadClient(string filename) {
@@ -83,17 +96,27 @@ void DownloadClient(string filename) {
 
 wxIMPLEMENT_APP(Application);
 
+wxBEGIN_EVENT_TABLE(StartWindow, wxFrame)
+    EVT_BUTTON(StartWindow::START_SERVER_BUTTON_ID, StartWindow::HandleStartServer)
+    EVT_BUTTON(StartWindow::CONNECT_TO_SERVER_BUTTON_ID, StartWindow::HandleConnectToServer)
+wxEND_EVENT_TABLE()
+
 StartWindow::StartWindow() : wxFrame(nullptr, wxID_ANY, "Syncer", wxPoint(100, 100), wxSize(800, 600)) {
 
-    Connection::SAVE_FOLDER    = GetSaveFolder();
-    Connection::ARCHIVE_FOLDER = GetArchiveFolder();
+    startServerButton = new wxButton(this, START_SERVER_BUTTON_ID, "Start Server", wxPoint(100, 250), wxSize(250, 30));
+    connectToServerButton = new wxButton(this, CONNECT_TO_SERVER_BUTTON_ID, "Connect To Server", wxPoint(400, 250), wxSize(250, 30));
+}
 
-    portTb = new wxTextCtrl(this, wxID_ANY, GetPort(), wxPoint(200, 100), wxSize(400, 25));
-    save_folderTb = new wxTextCtrl(this, wxID_ANY, "./" + GetSaveFolder(), wxPoint(200, 200), wxSize(400, 25));
-    archive_folderTb = new wxTextCtrl(this, wxID_ANY, "./" + GetArchiveFolder(), wxPoint(200, 300), wxSize(400, 25));
+void StartWindow::HandleStartServer(wxCommandEvent& evt) {
+    startServerButton->Enable(false);
+    connectToServerButton->Enable(false);
+    StartServer();
+}
 
-    startServerButton = new wxButton(this, wxID_ANY, "Start Server", wxPoint(100, 400), wxSize(100, 30));
-    connectToServerButton = new wxButton(this, wxID_ANY, "Connect To Server", wxPoint(400, 400), wxSize(100, 30));
+void StartWindow::HandleConnectToServer(wxCommandEvent& evt) {
+    startServerButton->Enable(false);
+    connectToServerButton->Enable(false);
+    ListServerFiles();
 }
 
 Application::Application() {}
@@ -101,8 +124,12 @@ Application::~Application() {}
 
 bool Application::OnInit() {
 
+    Connection::SAVE_FOLDER    = GetSaveFolder();
+    Connection::ARCHIVE_FOLDER = GetArchiveFolder();
+
     _window = new StartWindow();
     _window->Show();
+
     return true;
 }
 

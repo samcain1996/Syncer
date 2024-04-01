@@ -3,6 +3,7 @@ Syncer syncs a file to a central database.
 ## Requirements
 1. C++ 17 or higher
 2. Boost (https://www.boost.org/)
+3. wxWidgets (GUI version only)
 
 ## Usage
 Two computers are needed. Computer A will serve as the server and host all the content that will be synced.
@@ -16,9 +17,16 @@ Computer B will serve as the client and upload and download files to Computer A.
 5. Start Client
 
 ## Compiling The Code
-### Example
+
+### GUI
 Open the terminal in the directory 'Syncer'
-`clang++ -std=c++17 -I /path_to_boost/ -I include/ src/* -o syncer`
+`clang++ -g -std=c++20 -I path_to_boost -I path_to_wxWidgets -I include `wx-config --cxxflags` -o syncer-gui src/*.cpp `wx-config --libs`
+
+### Command Line
+Open the terminal in the directory 'Syncer'
+`clang++ -std=c++17 -I path_to_boost -I include src/* -o syncer`
+
+
 
 ## Running
 Flags:

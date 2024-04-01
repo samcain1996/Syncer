@@ -1,15 +1,22 @@
 #include "wx/wx.h"
+#include <thread>
+#include <future>
 
 class StartWindow : public wxFrame {
-public:
-    StartWindow();
 
-    wxTextCtrl* portTb                  = nullptr;
-    wxTextCtrl* save_folderTb           = nullptr;
-    wxTextCtrl* archive_folderTb        = nullptr;
+    constexpr static const int START_SERVER_BUTTON_ID       = 10001;
+    constexpr static const int CONNECT_TO_SERVER_BUTTON_ID  = 10002;
 
     wxButton*   startServerButton       = nullptr;
     wxButton*   connectToServerButton   = nullptr;
+
+    void HandleStartServer(wxCommandEvent& evt);
+    void HandleConnectToServer(wxCommandEvent& evt);
+
+public:
+    StartWindow();
+
+    wxDECLARE_EVENT_TABLE();
 };
 
 class Application : public wxApp {

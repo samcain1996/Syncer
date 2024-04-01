@@ -35,6 +35,12 @@ using Buffer = std::array<char, BUFFER_SIZE>;
 
 File ReadFile(const string& filename, const string& folder="saved/");
 
+enum ServerCommand : char {
+    UPLOAD = 'u',
+    DOWNLOAD = 'd',
+    LIST = 'l'
+};
+
 struct Connection {
 
     static inline const Data DISCONNECT_MESSAGE = { 'B', 'Y', 'E', '!' };
@@ -70,6 +76,7 @@ struct Client {
     bool Connect(const string& address, const string& port);
     File GetFile(const string& filename);
     bool UploadFile(const string& filename);
+    string GetContents();
 
 };
 
@@ -83,5 +90,6 @@ struct Server {
     void Loop();
     bool UpdateFile(const string& filename, Data& data);
     bool AddFile(const string& filename, Data& data);
+    void ListFiles();
 };
 

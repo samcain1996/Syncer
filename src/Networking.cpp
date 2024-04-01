@@ -75,10 +75,19 @@ Client::Client() {
 
 }
 
+string Client::GetContents() {
+
+    // TODO
+    connection.SendData({ LIST });
+
+    Data response = connection.ReceiveData();
+    
+    return string(response.begin(), response.end());
+}
+
 bool Client::UploadFile(const string& filename) {
 
-    string uploadStr = "upload";
-    connection.SendData(Data(uploadStr.begin(), uploadStr.end()));
+    connection.SendData({ UPLOAD });
     connection.SendData(Data(filename.begin(), filename.end()));
     connection.SendData(ReadFile(filename, "").value().second);
 
@@ -89,8 +98,7 @@ File Client::GetFile(const string& filename) {
 
     // Send download command
     File file          = NoFile;
-    string downloadStr = "download";
-    connection.SendData(Data(downloadStr.begin(), downloadStr.end()));
+    connection.SendData({ DOWNLOAD });
     connection.SendData(Data(filename.begin(), filename.end()));
 
     if (connection.err_code != errc::success) { return file; }
@@ -141,24 +149,36 @@ void Server::Loop() {
     while(true) {
 
         // Receive request from client
-        Data data = connection.ReceiveData();
-        bool download = memcmp(data.data(), "download", data.size()) == 0;
+        ServerCommand command = static_cast<ServerCommand>(connection.ReceiveData()[0]);
 
-        // Receive filename from client
-        data = connection.ReceiveData();
-        string filename(data.begin(), data.end());
+        string filename;
+        Data data;
+        File f;
+        switch (command) {
+            case LIST:
+                ListFiles();
+                break;
 
-        // Perform request
-        if (download) {     
-            File f = ReadFile(filename);
-            connection.SendData(f.value().second);
+            case UPLOAD:
+                // Receive filename from client
+                data = connection.ReceiveData();
+                filename = {data.begin(), data.end()};
+
+                data = connection.ReceiveData();
+                UpdateFile(filename, data); 
+                break;
+
+            case DOWNLOAD:
+                // Receive filename from client
+                data = connection.ReceiveData();
+                filename = {data.begin(), data.end()};
+
+                // Perform request
+                f = ReadFile(filename);
+                connection.SendData(f.value().second);
+                break;
+
         }
-
-        else {
-            Data data = connection.ReceiveData();
-            UpdateFile(filename, data); 
-        }
-
         // Disconnect
         connection.connected = false;
         connection.socket->close();
@@ -193,6 +213,14 @@ bool Server::AddFile(const string& filename, Data& data) {
 
     writer.write(data.data(), data.size());
     return true;
+
+}
+
+void Server::ListFiles() {
+
+    // TODO
+    const string NOT_IMPL_STR = "Not Implemented";
+    connection.SendData(Data(NOT_IMPL_STR.begin(), NOT_IMPL_STR.end()));
 
 }
 
