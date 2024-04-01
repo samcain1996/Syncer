@@ -105,7 +105,7 @@ struct Server {
 
     bool Listen();
     void Loop();
-    bool UpdateFile(const string& filename, Data& data);
+    bool UpdateFile(const string& filename, Data& data, const string& folder="");
     bool AddFile(const string& filename, Data& data);
     void ListFiles();
 };

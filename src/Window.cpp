@@ -45,9 +45,9 @@ void ClientWindow::PopulateListBox() {
 
     savedFilesList->Clear();
 
-    stringstream files(ListServerFiles());
     string filename;
     wxArrayString savedFiles;
+    stringstream files(ListServerFiles());
     while (getline(files, filename)) {
         savedFiles.Add(filename);
     }
@@ -61,8 +61,7 @@ void ClientWindow::HandleDownload(wxCommandEvent& evt) {
 }
 
 void ClientWindow::HandleUpload(wxCommandEvent& evt) {
-    UploadClient(string { uploadFileName->GetValue().c_str() } );
+    string filename { uploadFileName->GetValue().c_str() };
+    UploadClient(filename);
     PopulateListBox();
 }
-
-ServerWindow::ServerWindow() {}

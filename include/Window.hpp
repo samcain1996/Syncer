@@ -39,8 +39,3 @@ public:
 
     wxDECLARE_EVENT_TABLE();
 };
-
-class ServerWindow : public wxFrame {
-public:
-    ServerWindow();
-};

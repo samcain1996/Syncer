@@ -1,0 +1,2 @@
+clear;
+clang++ -g -std=c++20 -I /Users/samcain/Documents/Code/wxWidgets/include -I/Users/samcain/Documents/Code/boost_1_83_0 -I include `../wxWidgets/buildMacos/wx-config --cxxflags` -o syncer-gui src/*.cpp -fexperimental-library `../wxWidgets/buildMacos/wx-config --libs`

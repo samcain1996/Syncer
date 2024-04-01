@@ -77,7 +77,6 @@ Client::Client() {
 
 string Client::GetContents() {
 
-    // TODO
     connection.SendData({ LIST });
 
     Data response = connection.ReceiveData();
@@ -87,9 +86,18 @@ string Client::GetContents() {
 
 bool Client::UploadFile(const string& filename) {
 
+    string folder = "";
+    string fname = "";
+    if (filename.rfind('/') != string::npos) {
+        folder = filename.substr(0, filename.rfind('/') + 1);
+        fname = filename.substr(filename.rfind('/') + 1);
+    }
+
     connection.SendData({ UPLOAD });
-    connection.SendData(Data(filename.begin(), filename.end()));
-    connection.SendData(ReadFile(filename, "").value().second);
+    connection.SendData(Data(fname.begin(), fname.end()));
+    connection.SendData(ReadFile(fname, folder).value().second);
+
+    clog << fname << "\t" << folder << "\n";
 
     return true;
 }
@@ -138,7 +146,7 @@ Server::Server(const string& port) {
 
     // Try to listen on port, if port is not open, try next
     while (!Connection::portOpen(p)) { p++; }
-    std::clog << "Server started on port: " << to_string(p) << "\n";
+    clog << "Server started on port: " << to_string(p) << "\n";
 
     connection.acceptor   = make_unique<tcp::acceptor>(*connection.io_context, tcp::endpoint(tcp::v4(), p));
     connection.socket     = make_unique<tcp::socket>(*connection.io_context);
@@ -147,7 +155,7 @@ Server::Server(const string& port) {
 
 void Server::Loop() {
 
-while(true) {
+    while(true) {
         // Receive request from client
         ServerCommand command = static_cast<ServerCommand>(connection.ReceiveData()[0]);
 
@@ -183,12 +191,12 @@ while(true) {
     connection.connected = false;
     connection.socket->close();
     Listen();
-}
+    }
 
 }
 
 
-bool Server::UpdateFile(const string& filename, Data& data) {
+bool Server::UpdateFile(const string& filename, Data& data, const string& folder) {
 
     // Add file if it doesn't exist
     ifstream file(connection.SAVE_FOLDER+filename,  ios_base::binary);
@@ -197,7 +205,7 @@ bool Server::UpdateFile(const string& filename, Data& data) {
     if (file.bad() || tmp.empty()) { return AddFile(connection.SAVE_FOLDER + filename, data); }
     
     // Archive file if it does exist then update
-    File f = ReadFile(filename);
+    File f = ReadFile(filename, folder);
     AddFile(connection.ARCHIVE_FOLDER+filename, f.value().second);
     ofstream(connection.SAVE_FOLDER+filename, ios_base::binary).write(data.data(), data.size());
 

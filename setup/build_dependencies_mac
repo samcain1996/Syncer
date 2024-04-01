@@ -1,0 +1,14 @@
+#!/bin/sh
+
+starting_dir=`pwd`
+
+cd ${1}
+
+# Build wxWidgets on mac
+mkdir build-macOS
+cd build-macOS
+../configure --enable-debug --enable-universal-binary=x86_64,arm64 --disable-sys-libs
+make
+
+cd ${starting_dir}
+make
