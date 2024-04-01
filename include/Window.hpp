@@ -25,6 +25,8 @@ public:
 class ClientWindow : public wxFrame {
 
     void PopulateListBox();
+    constexpr static const int DOWNLOAD_BUTTON_ID = 10001;
+    constexpr static const int UPLOAD_BUTTON_ID   = 10002;
 
 public:
     ClientWindow();

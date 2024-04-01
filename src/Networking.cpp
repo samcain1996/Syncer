@@ -86,11 +86,13 @@ string Client::GetContents() {
 
 bool Client::UploadFile(const string& filename) {
 
+    // Parse file path
     string folder = "";
-    string fname = "";
-    if (filename.rfind('/') != string::npos) {
-        folder = filename.substr(0, filename.rfind('/') + 1);
-        fname = filename.substr(filename.rfind('/') + 1);
+    string fname = filename;
+    const auto fnameOffset = filename.rfind('/');
+    if (fnameOffset != string::npos) {
+        folder = filename.substr(0, fnameOffset + 1);
+        fname = filename.substr(fnameOffset + 1);
     }
 
     connection.SendData({ UPLOAD });
@@ -205,7 +207,7 @@ bool Server::UpdateFile(const string& filename, Data& data, const string& folder
     if (file.bad() || tmp.empty()) { return AddFile(connection.SAVE_FOLDER + filename, data); }
     
     // Archive file if it does exist then update
-    File f = ReadFile(filename, folder);
+    File f = ReadFile(filename);
     AddFile(connection.ARCHIVE_FOLDER+filename, f.value().second);
     ofstream(connection.SAVE_FOLDER+filename, ios_base::binary).write(data.data(), data.size());
 
