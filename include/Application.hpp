@@ -6,7 +6,7 @@ public:
     ~Application();
 
 private:
-    wxFrame* _window = nullptr;
+    StartWindow* _window = nullptr;
 
 public:
     virtual bool OnInit() wxOVERRIDE ;

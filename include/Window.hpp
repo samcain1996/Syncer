@@ -6,6 +6,7 @@ extern void UploadClient(string);
 extern string ListServerFiles();
 
 class StartWindow : public wxFrame {
+    
 
     constexpr static const int START_SERVER_BUTTON_ID       = 10001;
     constexpr static const int CONNECT_TO_SERVER_BUTTON_ID  = 10002;

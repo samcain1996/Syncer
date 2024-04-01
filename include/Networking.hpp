@@ -14,6 +14,8 @@
 #include <string_view>
 #include "boost/asio.hpp"
 #include "wx/wx.h"
+#include "wx/filesys.h"
+#include "wx/mstream.h"
 
 using Data = std::vector<char>;
 using File = std::optional<std::pair<std::string, Data>>;
@@ -55,7 +57,8 @@ File ReadFile(const string& filename, const string& folder="saved/");
 enum ServerCommand : char {
     UPLOAD = 'u',
     DOWNLOAD = 'd',
-    LIST = 'l'
+    LIST = 'l',
+    ERROR = '\0'
 };
 
 struct Connection {

@@ -95,6 +95,8 @@ Application::~Application() {}
 
 bool Application::OnInit() {
 
+    wxInitAllImageHandlers();
+
     Connection::SAVE_FOLDER    = GetSaveFolder();
     Connection::ARCHIVE_FOLDER = GetArchiveFolder();
 

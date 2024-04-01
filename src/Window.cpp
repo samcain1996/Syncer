@@ -9,6 +9,7 @@ StartWindow::StartWindow() : wxFrame(nullptr, wxID_ANY, "Syncer", wxPoint(100, 1
 
     startServerButton     = new wxButton(this, START_SERVER_BUTTON_ID, "Start Server", wxPoint(100, 250), wxSize(250, 30));
     connectToServerButton = new wxButton(this, CONNECT_TO_SERVER_BUTTON_ID, "Connect To Server", wxPoint(400, 250), wxSize(250, 30));
+
 }
 
 void StartWindow::HandleStartServer(wxCommandEvent& evt) {

@@ -52,9 +52,11 @@ File ReadFile(const string& filename, const string& folder) {
 
     File file = NoFile;
 
+    if (!exists(folder + filename)) { return file; }
+
     // Open file
     ifstream fileStream(folder+filename, ios_base::binary);
-    if (fileStream.bad()) { return file; }
+    if (!fileStream.good()) { return file; }
     
     // Read file line by line and store in vector
     Data data;
@@ -95,11 +97,12 @@ bool Client::UploadFile(const string& filename) {
         fname = filename.substr(fnameOffset + 1);
     }
 
+    File file = ReadFile(fname, folder);
+    if (file == NoFile) { connection.SendData({ERROR}); return false; }
+
     connection.SendData({ UPLOAD });
     connection.SendData(Data(fname.begin(), fname.end()));
-    connection.SendData(ReadFile(fname, folder).value().second);
-
-    clog << fname << "\t" << folder << "\n";
+    connection.SendData(file.value().second);
 
     return true;
 }
@@ -187,6 +190,8 @@ void Server::Loop() {
                 f = ReadFile(filename);
                 connection.SendData(f.value().second);
                 break;
+            case ERROR:
+            default:
 
         }
 
