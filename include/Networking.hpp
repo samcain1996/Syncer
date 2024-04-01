@@ -4,13 +4,16 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <iomanip>
 #include <fstream>
 #include <filesystem>
 #include <sstream>
 #include <thread>
-#include <future>
 #include <iostream>
+#include <ranges>
+#include <string_view>
 #include "boost/asio.hpp"
+#include "wx/wx.h"
 
 using Data = std::vector<char>;
 using File = std::optional<std::pair<std::string, Data>>;
@@ -37,9 +40,10 @@ using std::ranges::for_each;
 using std::stringstream;
 using std::ostringstream;
 using std::istringstream;
-using std::async;
 using std::thread;
-using std::future;
+using std::cout;
+using std::cerr;
+using std::clog;
 
 static constexpr const size_t BUFFER_SIZE = 2048;
 static constexpr const std::nullopt_t NoFile = std::nullopt;
