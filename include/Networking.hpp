@@ -7,6 +7,8 @@
 #include <fstream>
 #include <filesystem>
 #include <sstream>
+#include <thread>
+#include <future>
 #include "boost/asio.hpp"
 
 using Data = std::vector<char>;
@@ -34,6 +36,9 @@ using std::ranges::for_each;
 using std::stringstream;
 using std::ostringstream;
 using std::istringstream;
+using std::async;
+using std::thread;
+using std::future;
 
 static constexpr const size_t BUFFER_SIZE = 2048;
 static constexpr const std::nullopt_t NoFile = std::nullopt;

@@ -55,16 +55,15 @@ void StartServer() {
 
 }
 
-void ListServerFiles() {
+string ListServerFiles() {
 
     Client client;
     if (!client.Connect(GetIpAddress(), GetPort())) {
         cerr << "Failed to connect\n";
-        return;
+        return "";
     }
 
-    string files = client.GetContents();
-    cout << files << "\n";
+    return client.GetContents();
 }
 
 void UploadClient(string filename) {
@@ -110,14 +109,34 @@ StartWindow::StartWindow() : wxFrame(nullptr, wxID_ANY, "Syncer", wxPoint(100, 1
 void StartWindow::HandleStartServer(wxCommandEvent& evt) {
     startServerButton->Enable(false);
     connectToServerButton->Enable(false);
-    StartServer();
+
+    thread([this](){ 
+        
+        StartServer(); 
+
+        startServerButton->Enable(true);
+        connectToServerButton->Enable(true);
+    
+    }).detach();
 }
 
 void StartWindow::HandleConnectToServer(wxCommandEvent& evt) {
     startServerButton->Enable(false);
     connectToServerButton->Enable(false);
-    ListServerFiles();
+
+    thread([this](){
+
+        future<string> response = async(std::launch::async, ListServerFiles);
+
+        while (response.wait_for(std::chrono::seconds(1)) != std::future_status::ready) {}
+        startServerButton->Enable(true);
+        connectToServerButton->Enable(true);
+
+        cout << response.get() << "\n";
+
+    }).detach();
 }
+
 
 Application::Application() {}
 Application::~Application() {}

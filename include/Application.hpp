@@ -1,6 +1,4 @@
 #include "wx/wx.h"
-#include <thread>
-#include <future>
 
 class StartWindow : public wxFrame {
 
@@ -9,7 +7,7 @@ class StartWindow : public wxFrame {
 
     wxButton*   startServerButton       = nullptr;
     wxButton*   connectToServerButton   = nullptr;
-
+    
     void HandleStartServer(wxCommandEvent& evt);
     void HandleConnectToServer(wxCommandEvent& evt);
 

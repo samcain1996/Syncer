@@ -146,7 +146,9 @@ Server::Server(const string& port) {
 
 void Server::Loop() {
 
-    while(true) {
+    bool shouldLoop = false;
+
+    do {
 
         // Receive request from client
         ServerCommand command = static_cast<ServerCommand>(connection.ReceiveData()[0]);
@@ -179,12 +181,13 @@ void Server::Loop() {
                 break;
 
         }
-        // Disconnect
-        connection.connected = false;
-        connection.socket->close();
-        Listen();
 
-    }
+
+    } while(shouldLoop);
+
+    // Disconnect
+    connection.connected = false;
+    connection.socket->close();
 
 }
 
@@ -222,7 +225,7 @@ void Server::ListFiles() {
     string p = current_path().string() + current_path().preferred_separator + Connection::SAVE_FOLDER;
 
     for_each(directory_iterator { path{p} }, 
-        [&fns](const path& entry){ fns << entry.filename() << "\n"; });
+        [&fns](const path& entry){ fns << entry.filename().string() << "\n"; });
 
     string filenames = fns.str();
     connection.SendData(Data(filenames.begin(), filenames.end()));
