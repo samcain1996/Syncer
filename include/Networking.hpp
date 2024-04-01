@@ -39,7 +39,7 @@ struct Connection {
 
     static inline const Data DISCONNECT_MESSAGE = { 'B', 'Y', 'E', '!' };
     static inline const Data ACK_MESSAGE        = { 'A', 'C', 'K' };
-    static inline string ARCHIVE_FOLDER;
+    static inline string ARCHIVE_FOLDER = "YESSSS";
     static inline string SAVE_FOLDER;
 
     static bool portOpen(unsigned short port);
