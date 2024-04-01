@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Application.hpp"
 #include "Networking.hpp"
 
@@ -45,7 +44,7 @@ string GetSaveFolder() {
 void StartServer() {
 
     Server server(GetPort());
-    clog << "Server started on port: " << GetPort() << "\n";
+
     if (!server.Listen()) {
         cerr << "Failed to connect\n";
         return;
@@ -60,7 +59,7 @@ string ListServerFiles() {
     Client client;
     if (!client.Connect(GetIpAddress(), GetPort())) {
         cerr << "Failed to connect\n";
-        return "";
+        return "Error";
     }
 
     return client.GetContents();
@@ -104,6 +103,7 @@ StartWindow::StartWindow() : wxFrame(nullptr, wxID_ANY, "Syncer", wxPoint(100, 1
 
     startServerButton = new wxButton(this, START_SERVER_BUTTON_ID, "Start Server", wxPoint(100, 250), wxSize(250, 30));
     connectToServerButton = new wxButton(this, CONNECT_TO_SERVER_BUTTON_ID, "Connect To Server", wxPoint(400, 250), wxSize(250, 30));
+    savedFilesList = new wxListBox(this, 10003, wxPoint(100, 50), wxSize(600, 150));
 }
 
 void StartWindow::HandleStartServer(wxCommandEvent& evt) {
@@ -126,13 +126,19 @@ void StartWindow::HandleConnectToServer(wxCommandEvent& evt) {
 
     thread([this](){
 
-        future<string> response = async(std::launch::async, ListServerFiles);
+        stringstream files(ListServerFiles());
 
-        while (response.wait_for(std::chrono::seconds(1)) != std::future_status::ready) {}
+        string filename;
+        wxArrayString savedFiles;
+
+        while (getline(files, filename)) {
+            savedFiles.Add(filename);
+        }
+
+        savedFilesList->InsertItems(savedFiles, 0);
+        
         startServerButton->Enable(true);
         connectToServerButton->Enable(true);
-
-        cout << response.get() << "\n";
 
     }).detach();
 }

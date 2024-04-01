@@ -138,6 +138,7 @@ Server::Server(const string& port) {
 
     // Try to listen on port, if port is not open, try next
     while (!Connection::portOpen(p)) { p++; }
+    std::clog << "Server started on port: " << to_string(p) << "\n";
 
     connection.acceptor   = make_unique<tcp::acceptor>(*connection.io_context, tcp::endpoint(tcp::v4(), p));
     connection.socket     = make_unique<tcp::socket>(*connection.io_context);
@@ -146,10 +147,7 @@ Server::Server(const string& port) {
 
 void Server::Loop() {
 
-    bool shouldLoop = false;
-
-    do {
-
+while(true) {
         // Receive request from client
         ServerCommand command = static_cast<ServerCommand>(connection.ReceiveData()[0]);
 
@@ -182,12 +180,10 @@ void Server::Loop() {
 
         }
 
-
-    } while(shouldLoop);
-
-    // Disconnect
     connection.connected = false;
     connection.socket->close();
+    Listen();
+}
 
 }
 

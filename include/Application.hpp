@@ -7,6 +7,7 @@ class StartWindow : public wxFrame {
 
     wxButton*   startServerButton       = nullptr;
     wxButton*   connectToServerButton   = nullptr;
+    wxListBox*  savedFilesList          = nullptr;
     
     void HandleStartServer(wxCommandEvent& evt);
     void HandleConnectToServer(wxCommandEvent& evt);

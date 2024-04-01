@@ -9,6 +9,7 @@
 #include <sstream>
 #include <thread>
 #include <future>
+#include <iostream>
 #include "boost/asio.hpp"
 
 using Data = std::vector<char>;
