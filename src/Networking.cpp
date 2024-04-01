@@ -218,9 +218,14 @@ bool Server::AddFile(const string& filename, Data& data) {
 
 void Server::ListFiles() {
 
-    // TODO
-    const string NOT_IMPL_STR = "Not Implemented";
-    connection.SendData(Data(NOT_IMPL_STR.begin(), NOT_IMPL_STR.end()));
+    ostringstream fns;
+    string p = current_path().string() + current_path().preferred_separator + Connection::SAVE_FOLDER;
+
+    for_each(directory_iterator { path{p} }, 
+        [&fns](const path& entry){ fns << entry.filename() << "\n"; });
+
+    string filenames = fns.str();
+    connection.SendData(Data(filenames.begin(), filenames.end()));
 
 }
 

@@ -5,6 +5,8 @@
 #include <string>
 #include <optional>
 #include <fstream>
+#include <filesystem>
+#include <sstream>
 #include "boost/asio.hpp"
 
 using Data = std::vector<char>;
@@ -13,6 +15,7 @@ using File = std::optional<std::pair<std::string, Data>>;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 using namespace boost::system;
+using namespace std::filesystem;
 
 using SocketPtr     = std::unique_ptr<tcp::socket>;
 using AcceptorPtr   = std::unique_ptr<tcp::acceptor>;
@@ -27,6 +30,10 @@ using std::ifstream;
 using std::ofstream;
 using std::ios_base;
 using std::to_string;
+using std::ranges::for_each;
+using std::stringstream;
+using std::ostringstream;
+using std::istringstream;
 
 static constexpr const size_t BUFFER_SIZE = 2048;
 static constexpr const std::nullopt_t NoFile = std::nullopt;
