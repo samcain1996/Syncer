@@ -160,7 +160,8 @@ Server::Server(const string& port) {
 
 void Server::Loop() {
 
-    while(true) {
+    bool loop = true;
+    while(loop) {
         // Receive request from client
         ServerCommand command = static_cast<ServerCommand>(connection.ReceiveData()[0]);
 
@@ -192,12 +193,12 @@ void Server::Loop() {
                 break;
             case ERROR:
             default:
-
+                loop = false;
         }
 
     connection.connected = false;
     connection.socket->close();
-    Listen();
+    if (loop) { Listen(); }
     }
 
 }

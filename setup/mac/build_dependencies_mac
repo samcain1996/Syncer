@@ -1,14 +1,11 @@
 #!/bin/sh
 
-starting_dir=`pwd`
+cd ../wxWidgets
 
-cd ${1}
+cpus=`sysctl -n hw.ncpu`
 
 # Build wxWidgets on mac
 mkdir build-macOS
 cd build-macOS
 ../configure --enable-debug --enable-universal-binary=x86_64,arm64 --disable-sys-libs
-make
-
-cd ${starting_dir}
-make
+make -j$cpus

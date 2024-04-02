@@ -2,19 +2,40 @@
 
 cd ${1}
 
-# Download Dependencies
-curl -LO https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.bz2 &
+echo "Download Boost? (y/n)"
+read dBoost
+
+echo "Download wxWidgets? (y/n)"
+read dWx
+
+if [ $dBoost == "y" ]; then
+    curl -LO https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.bz2 &
+fi
+if [ $dWx == "y" ]; then
 curl -LO https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.0/wxWidgets-3.2.0.tar.bz2 &
+fi
 wait
 
 # Unpack
-tar -xvjf boost_1_79_0.tar.bz2 &
+if [ $dBoost == "y" ]; then
+tar -xvjf boost_1_83_0.tar.bz2 &
+fi
+if [ $dWx == "y" ]; then
 tar -xvjf wxWidgets-3.2.0.tar.bz2 &
+fi
 wait
 
-rm boost_1_79_0.tar.bz2
+if [ $dBoost == "y" ]; then
+rm boost_1_83_0.tar.bz2
+fi
+if [ $dWx == "y" ]; then
 rm wxWidgets-3.2.0.tar.bz2
+fi
 
 # Simplify name
-mv boost_1_79_0 boost
+if [ $dBoost == "y" ]; then
+mv boost_1_83_0 boost
+fi
+if [ $dWx == "y" ]; then
 mv wxWidgets-3.2.0 wxWidgets
+fi
