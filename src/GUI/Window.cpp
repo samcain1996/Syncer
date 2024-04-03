@@ -1,4 +1,4 @@
-#include "Window.hpp"
+#include "GUI/Window.hpp"
 
 wxBEGIN_EVENT_TABLE(StartWindow, wxFrame)
     EVT_BUTTON(StartWindow::START_SERVER_BUTTON_ID, StartWindow::HandleStartServer)

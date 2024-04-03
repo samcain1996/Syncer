@@ -1,4 +1,7 @@
+#pragma once
+
 #include "Networking.hpp"
+#include "wx/wx.h"
 
 extern void StartServer();
 extern void DownloadClient(string);

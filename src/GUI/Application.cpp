@@ -1,4 +1,4 @@
-#include "Application.hpp"
+#include "GUI/Application.hpp"
 #include "Networking.hpp"
 
 using Args = std::vector<std::string>;

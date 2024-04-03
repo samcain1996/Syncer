@@ -13,9 +13,6 @@
 #include <ranges>
 #include <string_view>
 #include "boost/asio.hpp"
-#include "wx/wx.h"
-#include "wx/filesys.h"
-#include "wx/mstream.h"
 
 using Data = std::vector<char>;
 using File = std::optional<std::pair<std::string, Data>>;
