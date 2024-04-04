@@ -238,8 +238,10 @@ void Server::ListFiles() {
 
     ostringstream fns;
 
-    for_each(directory_iterator { path{ current_path().string() + "/" + Connection::SAVE_FOLDER } }, 
-        [&fns](const path& entry){ fns << entry.filename().string() << "\n"; });
+    path directory { current_path().string() + separator + Connection::SAVE_FOLDER } ;
+    for (const path& entry : directory_iterator { directory }) { 
+        fns << entry.filename().string() << "\n"; 
+    }
 
     const string filenames = fns.str();
     connection.SendData(Data(filenames.begin(), filenames.end()));
@@ -253,4 +255,15 @@ bool Server::Listen() {
 
     return connection.IsConnected();
     
+}
+
+void Server::Start() {
+
+    if (!Listen()) {
+        cerr << "Unable to Start Server!";
+        return;
+    }
+
+    Loop();
+
 }

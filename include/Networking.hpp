@@ -1,19 +1,8 @@
 #pragma once
 
-#include <array>
-#include <vector>
-#include <string>
-#include <optional>
-#include <iomanip>
-#include <fstream>
-#include <filesystem>
-#include <sstream>
-#include <thread>
-#include <iostream>
-#include <ranges>
-#include <string_view>
-#include <cctype>
+
 #include "boost/asio.hpp"
+#include "Config.hpp"
 
 using Data = std::vector<char>;
 using File = std::optional<std::pair<std::string, Data>>;
@@ -47,6 +36,7 @@ using std::clog;
 
 static constexpr const size_t BUFFER_SIZE = 2048;
 static constexpr const std::nullopt_t NoFile = std::nullopt;
+static constexpr const char separator = '/';
 
 using Buffer = std::array<char, BUFFER_SIZE>;
 
@@ -63,7 +53,7 @@ struct Connection {
 
     static inline const Data DISCONNECT_MESSAGE = { 'B', 'Y', 'E', '!' };
     static inline const Data ACK_MESSAGE        = { 'A', 'C', 'K' };
-    static inline string ARCHIVE_FOLDER = "YESSSS";
+    static inline string ARCHIVE_FOLDER;
     static inline string SAVE_FOLDER;
 
     static bool portOpen(unsigned short port);
@@ -104,6 +94,7 @@ struct Server {
     
     Server(const string& port);
 
+    void Start();
     bool Listen();
     void Loop();
     bool UpdateFile(const string& filename, Data& data, const string& folder="");

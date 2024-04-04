@@ -3,11 +3,6 @@
 #include "Networking.hpp"
 #include "wx/wx.h"
 
-extern void StartServer();
-extern void DownloadClient(string);
-extern void UploadClient(string);
-extern string ListServerFiles();
-
 class StartWindow : public wxFrame {
     
 

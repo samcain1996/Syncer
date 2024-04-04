@@ -16,7 +16,12 @@ void StartWindow::HandleStartServer(wxCommandEvent& evt) {
     startServerButton->Enable(false);
     connectToServerButton->Enable(false);
 
-    thread(StartServer).detach();
+    thread([](){ 
+
+        Server server(GetPort());
+        server.Start();
+
+    }).detach();
 }
 
 void StartWindow::HandleConnectToServer(wxCommandEvent& evt) {
@@ -46,27 +51,39 @@ void ClientWindow::PopulateListBox() {
 
     savedFilesList->Clear();
 
-    string filename;
-    wxArrayString savedFiles;
-    stringstream files(ListServerFiles());
-    while (getline(files, filename)) {
-        savedFiles.Add(filename);
-    }
+    Client client;
+    if (client.Connect(GetIpAddress(), GetPort())) { 
 
-    savedFilesList->InsertItems(savedFiles, 0);
+        string file;
+        wxArrayString files;
+        
+        stringstream stream(client.GetContents());
+        while (getline(stream, file)) {
+            files.Add(file);
+        }
+
+        savedFilesList->InsertItems(files, 0);
+    }
 }
 
 void ClientWindow::HandleDownload(wxCommandEvent& evt) {
 
-    string filename { savedFilesList->GetString(savedFilesList->GetSelection()).c_str() };
-    DownloadClient(filename);
+    const string filename { savedFilesList->GetString(savedFilesList->GetSelection()).c_str() };
+
+    Client client;
+    if (client.Connect(GetIpAddress(), GetPort())) {
+        client.GetFile(filename);
+    }
     
 }
 
 void ClientWindow::HandleUpload(wxCommandEvent& evt) {
 
-    string filename { uploadFileName->GetValue().c_str() };
-    UploadClient(filename);
+    const string filename { uploadFileName->GetValue().c_str() };
+    Client client;
+    if (client.Connect(GetIpAddress(), GetPort())) {
+        client.UploadFile(filename);
+    }
     
     PopulateListBox();
 }
