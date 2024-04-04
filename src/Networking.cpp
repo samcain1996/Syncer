@@ -79,7 +79,7 @@ Client::Client() {
 
 string Client::GetContents() {
 
-    connection.SendData({ LIST });
+    connection.SendData({ static_cast<char>(ServerCommand::LIST) });
 
     Data response = connection.ReceiveData();
     
@@ -98,9 +98,12 @@ bool Client::UploadFile(const string& filename) {
     }
 
     File file = ReadFile(fname, folder);
-    if (file == NoFile) { connection.SendData({ERROR}); return false; }
+    if (file == NoFile) { 
+        connection.SendData({static_cast<char>(ServerCommand::ERROR)}); 
+        return false; 
+    }
 
-    connection.SendData({ UPLOAD });
+    connection.SendData({ static_cast<char>(ServerCommand::UPLOAD) });
     connection.SendData(Data(fname.begin(), fname.end()));
     connection.SendData(file.value().second);
 
@@ -111,7 +114,7 @@ File Client::GetFile(const string& filename) {
 
     // Send download command
     File file          = NoFile;
-    connection.SendData({ DOWNLOAD });
+    connection.SendData({ static_cast<char>(ServerCommand::DOWNLOAD) });
     connection.SendData(Data(filename.begin(), filename.end()));
 
     if (connection.err_code != errc::success) { return file; }
@@ -169,11 +172,11 @@ void Server::Loop() {
         Data data;
         File f;
         switch (command) {
-            case LIST:
+            case ServerCommand::LIST:
                 ListFiles();
                 break;
 
-            case UPLOAD:
+            case ServerCommand::UPLOAD:
                 // Receive filename from client
                 data = connection.ReceiveData();
                 filename = {data.begin(), data.end()};
@@ -182,7 +185,7 @@ void Server::Loop() {
                 UpdateFile(filename, data); 
                 break;
 
-            case DOWNLOAD:
+            case ServerCommand::DOWNLOAD:
                 // Receive filename from client
                 data = connection.ReceiveData();
                 filename = {data.begin(), data.end()};
@@ -191,7 +194,7 @@ void Server::Loop() {
                 f = ReadFile(filename);
                 connection.SendData(f.value().second);
                 break;
-            case ERROR:
+            case ServerCommand::ERROR:
             default:
                 loop = false;
         }
@@ -234,12 +237,11 @@ bool Server::AddFile(const string& filename, Data& data) {
 void Server::ListFiles() {
 
     ostringstream fns;
-    string p = current_path().string() + current_path().preferred_separator + Connection::SAVE_FOLDER;
 
-    for_each(directory_iterator { path{p} }, 
+    for_each(directory_iterator { path{ current_path().string() + "/" + Connection::SAVE_FOLDER } }, 
         [&fns](const path& entry){ fns << entry.filename().string() << "\n"; });
 
-    string filenames = fns.str();
+    const string filenames = fns.str();
     connection.SendData(Data(filenames.begin(), filenames.end()));
 
 }

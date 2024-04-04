@@ -1,0 +1,1 @@
+setup/mac/build-debug.sh ../

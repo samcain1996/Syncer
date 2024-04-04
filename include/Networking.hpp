@@ -12,6 +12,7 @@
 #include <iostream>
 #include <ranges>
 #include <string_view>
+#include <cctype>
 #include "boost/asio.hpp"
 
 using Data = std::vector<char>;
@@ -51,7 +52,7 @@ using Buffer = std::array<char, BUFFER_SIZE>;
 
 File ReadFile(const string& filename, const string& folder="saved/");
 
-enum ServerCommand : char {
+enum class ServerCommand : char {
     UPLOAD = 'u',
     DOWNLOAD = 'd',
     LIST = 'l',

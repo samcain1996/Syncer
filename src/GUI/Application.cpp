@@ -22,7 +22,9 @@ string ExtractConfig(string configName, const string& defaultValue="") {
 }
 
 string GetIpAddress() {
-    return ExtractConfig("ip", "0.0.0.0");
+    string ip;
+    for_each(ExtractConfig("ip", "0.0.0.0"), [&ip](char c){ ip += c; });
+    return ip;
 }
 
 string GetPort() {
